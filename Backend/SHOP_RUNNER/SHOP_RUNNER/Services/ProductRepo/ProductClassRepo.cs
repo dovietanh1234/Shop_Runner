@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SHOP_RUNNER.Common;
 using SHOP_RUNNER.DTOs.Brand_DTO;
 using SHOP_RUNNER.DTOs.Category_DTO;
 using SHOP_RUNNER.DTOs.Color_DTO;
@@ -8,12 +9,14 @@ using SHOP_RUNNER.DTOs.Size_DTO;
 using SHOP_RUNNER.Entities;
 using SHOP_RUNNER.Models.Product_Model;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace SHOP_RUNNER.Services.ProductRepo
 {
     public class ProductClassRepo : IProductRepo
     {
         private readonly RunningShopContext _context;
+        public static int PAGE_SIZE { get ; set; } = 3;
         public ProductClassRepo(RunningShopContext context) { 
             _context = context;
         }
@@ -250,7 +253,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
         }
 
 
-        // sửa đang sai
+       
         public void UpdateProduct(EditProduct product)
         {
             var product_new = _context.Products.FirstOrDefault(p => p.Id == product.Id);
@@ -270,6 +273,173 @@ namespace SHOP_RUNNER.Services.ProductRepo
                 _context.SaveChanges();
             }
         }
+
+       public List<ProductGetAll> Paging(int page, int pagesize)
+        {
+            var Products = _context.Products.AsQueryable().Include(p => p.Category);
+
+            var result = PaginationList<Product>.Create(Products, page, pagesize > 3 ? pagesize : PAGE_SIZE);
+
+            List<ProductGetAll> New_List = new List<ProductGetAll>();
+
+            foreach (var product in result) {
+
+                New_List.Add(new ProductGetAll()
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Description = product.Description,
+                    Thumbnail = product.Thumbnail,
+                    Qty = product.Qty,
+                    CategoryId = product.CategoryId,
+                    Category = new CategoryGetAll()
+                    {
+                        Id = product.Category.Id,
+                        Name = product.Category.Name
+                    }
+                });
+
+            }
+
+            return New_List;
+        }
+
+
+
+        // filter đang hỏng!
+       public List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color)
+        {
+            // THỰC HIỆN TẠO MỘT TRUY VẤN CÓ THỂ HOLD ĐỢI CÁC THUỘC TÍNH KHÁC  (bằng cách sd hàm .AsQueryable() ) LẤY VỀ ALL DATA
+            var Products = _context.Products.AsQueryable();
+
+            #region FILTER_PRICE
+            if (from.HasValue)
+            {
+                Products = Products.Where(p => p.Price >= Convert.ToDecimal(from));
+            }
+
+            if (to.HasValue)
+            {
+                Products = Products.Where(p => p.Price <= Convert.ToDecimal(to));
+            }
+            #endregion
+
+            Products = Products.Include(p => p.Category).Include(p => p.Gender).Include(p => p.Brand).Include(p => p.Size).Include(p => p.Color);
+
+            #region FILTER CATE GENDER BRAND SIZE COLOR
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                //Products = Products.Where(p => p.Category.Name == category);
+                Products = Products.Where(p => EF.Functions.Like(p.Category.Name, category));
+            }
+
+            if (!string.IsNullOrEmpty(gender))
+            {
+                // Products = Products.Where(p => p.Gender.Name == gender);
+                Products = Products.Where(p => EF.Functions.Like(p.Gender.Name, gender));
+            }
+
+            if (!string.IsNullOrEmpty(brand))
+            {
+                // Products = Products.Where(p => p.Brand.Name == brand);
+                Products = Products.Where(p => EF.Functions.Like(p.Brand.Name, brand));
+            }
+
+            if (!string.IsNullOrEmpty(size))
+            {
+                //Products = Products.Where(p => p.Size.Name == size);
+                Products = Products.Where(p => EF.Functions.Like(p.Size.Name, size));
+            }
+
+            if (!string.IsNullOrEmpty(color))
+            {
+                //Products = Products.Where(p => p.Color.Name == color);
+                Products = Products.Where(p => EF.Functions.Like( p.Color.Name, color)); 
+            }
+
+            #endregion
+
+            // if it does not have any case -> sort all products and return for client:
+            Products = Products.OrderBy(p => p.Name);
+            Products.ToList();
+
+
+            List<ProductGetAll> List_p = new List<ProductGetAll>();
+
+            foreach (var p in Products)
+            {
+                List_p.Add(new ProductGetAll()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Description = p.Description,
+                    Thumbnail = p.Thumbnail,
+                    Qty = p.Qty,
+                    CategoryId = p.CategoryId,
+                    Category = new CategoryGetAll()
+                    {
+                        Id = p.Category.Id,
+                        Name = p.Category.Name
+                    }
+
+                });
+            }
+
+            return List_p;
+
+        }
+
+
+        public List<ProductGetAll> Sort(string? sortBy)
+        {
+            var Products = _context.Products.AsQueryable();
+            Products = Products.OrderBy(p => p.Name);
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "NAME_DESC": Products = Products.OrderByDescending(p => p.Name); break;
+                    case "PRICE_ASC": Products = Products.OrderBy(p => p.Price); break;
+                    case "PRICE_DESC": Products = Products.OrderByDescending(p => p.Price); break;
+                }
+            }
+
+            Products.Include(p => p.Category).ToList();
+
+            List<ProductGetAll> list_p = new List<ProductGetAll>();
+
+            foreach (var p in Products)
+            {
+                list_p.Add(new ProductGetAll()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Description = p.Description,
+                    Thumbnail = p.Thumbnail,
+                    Qty = p.Qty,
+                    CategoryId = p.CategoryId,
+                    Category = new CategoryGetAll()
+                    {
+                        Id = p.Category.Id,
+                        Name = p.Category.Name
+                    }
+                });
+
+            }
+            return list_p;
+        }
+
+
+
+
+
+
+
 
 
 

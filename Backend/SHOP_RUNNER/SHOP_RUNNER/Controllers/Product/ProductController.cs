@@ -113,6 +113,46 @@ namespace SHOP_RUNNER.Controllers.Product
             }
         }
 
+        [HttpGet]
+        [Route("Paginate")]
+        public IActionResult Paginate(int page = 1, int PageSize = 1) 
+        {
+            try
+            {
+                return Ok( _IProductRepo.Paging(page, PageSize) );
+            }catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Filter")]
+        public IActionResult Filtering(double? to, double? from, string? category, string? gender, string? brand, string? size, string? color)
+        {
+            try
+            {
+                return Ok(_IProductRepo.Filter(to, from, category, gender, brand, size, color));
+            }catch(Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Sorting")]
+        public IActionResult Sorting(string? sortBy)
+        {
+            try
+            {
+                return Ok( _IProductRepo.Sort(sortBy));
+
+            }catch(Exception ex) { 
+            return BadRequest(ex.Message);
+            }
+        }
+
+
+
 
     }
 }
