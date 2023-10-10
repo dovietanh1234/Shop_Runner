@@ -1,0 +1,1122 @@
+bui.Net -> ko phai la ngon ngu lap trinh! => hệ sinh thái của Microsoft ( phát triển ứng dụng trên nền tảng windown )
+
+
+Sản phẩm của .Net:
+1. Only windown -> .Net framework (1 nền tảng giúp các thiết bị chạy được các phần mềm cho windown )
+Web: ASP.NET
+APP: WinForm, Windown presentation form
+
+
+hai nền tảng hoàn toàn độc lộc nhau! 
+
+2. .Net core (Azure cloud) nền tảng doang ngiệp ( cross plat form ) -> bất kỳ hệ điều hành nào cx có thể chạy được chỉ việc tải .net core
+ưu điểm: cài đặt được nhiều ứng dụng, máy chủ rẻ hơn => XU THẾ MỚI 
+Web: Asp.net
+APP: UUP (ít)
+
+NGÔN NGỮ LẬP TRÌNH:
+C#
+F#
+VB
+VB+
+
+=> Họ ngôn ngữ .NET
+Tại sao lại họ ngôn ngữ .Net:
+-> project -> solution( nhiều projects bên trong "mỗi project làm một ngôn ngữ riêng Nhưng cùng chung một họ ngôn ngữ nhà C# -> khi biên dịch đóng gói có thể dùng cùng nhau ở project ngôn ngữ khác các package có đuôi là: .dll " )
+
+open solution -> file .sll 
+
+Nhược điểm: phạm vi hẹp, cty nội địa VN làm việc với Cty nước ngoài ... (ít công ty)
+
+Ưu điểm: công nghệ Mạnh, Cty lớn tính chuyên nghiệp cao -> code tính ưu việt cao! hiệu năng cao 
+
+*Mặc dù 2 nền tảng hoàn toàn khác nhau -> Nhưng gần như giống nhau về mặt ngôn ngữ (2 thằng nền tảng giống nhau nhưng khác một vài điểm nhỏ còn cách vẫn hành vẫn giống nhau)
+
+
+Kỹ thuật lập trình:
+1.  webForm -> MVC (3 4 buổi)
+
+
+2. Web Service API (một bài nhóm dài trong vòng 2 tháng | độ khó: 5 sao) WEB API -> điểm sẽ ảnh hưởng đến nhiều môn
+-> Dùng ASP.NET làm API 
+-> SQL server
+-> React js
+3. AZURE Micro Service 
+
+
+
+2|3 -> giống như Big System 
+khách  mua sắm
+staff  xử lý hệ thống
+admin  quản lý quan sát hệ thống 
+Quản lý cùng 1 database
+
+-> microservice
+
+
+
+nhận đề tài 
+SRS (sơ đồ thực thể)
+DB Diagram 
+Code
+
+
+BẮT ĐẦU BÀI HỌC ĐẦU:
+dependence cấu hình 
+program.cs -> file cấu hình khởi tạo giống như node 
+
+lỗi SSL -> chứng chỉ localhost chrome nó chặn -> 
+
+lấy theo controller -> lấy theo action 
+
+
+
+BUỔI 3:
+.NET có nhiều cách để làm việc với cơ sở dữ liệu:
+1. ADO.NET là một thư viện tiêu chuẩn của .NET Framework cung cấp các lớp 
+và phương thức để truy vấn CRUD, đồng thời nó cung cấp một số class, methods
+-> dùng để: truy cập nhiều loại CSDL khác nhau...
+2. Entity Framework Core là một thư viện .NET ... Cách sử dụng: sử dụng các 
+class & methods ánh xạ các đối tượng .net SANG bảng CSDL => giúp cho việc 
+truy cập dữ liệu dễ dàng trực quan 
+3. LINQ to SQL là một tiện ích mở rộng cho .NET Framework -> sử dụng ngôn 
+ngữ truy vấn LINQ ( để truy vấn dữ liệu từ CSDL ) => LINQ to SQL truy vấn 
+dữ liệu từ CSDL rất mạnh mẽ và linh hoạt
+4. Dapper là một thư viện .NET mã nguồn mở cung cấp một cách đơn giản và 
+hiệu quả để truy cập cơ sở dữ liệu, Nó sử dụng sql thuần tuý để truy cập 
+data từ CSDL => rất nhanh và hiều quả.
+_Nếu cần truy cập nhiều loại cơ sở dữ liệu khác nhau, thì ADO.NET có thể là
+ một lựa chọn tốt, Nếu cần một cách đơn giản và trực quan để truy cập cơ sở 
+dữ liệu, thì Entity Framework Core có thể là một lựa chọn tốt, Nếu cần một 
+cách mạnh mẽ và linh hoạt để truy vấn dữ liệu từ cơ sở dữ liệu, thì LINQ to 
+SQL có thể là một lựa chọn tốt, Nếu cần một cách nhanh chóng và hiệu quả để
+ truy cập cơ sở dữ liệu, thì Dapper có thể là một lựa chọn tốt.
+
+
+.NET java ko làm việc với mongoose DB và no sql ...
+vì nó ko tương xứng vì 2 công nghệ này đòi hỏi tính chặt chẽ bảo mật cao
+
+làm việc .net + sql server 
+
+// ADO là tầng thấp nhất 
+
+2 Ngôn ngữ tích hợp
+ADO.NET (JDBC) -> var a = 'select * from table'; // trả về object
+LinQ -> truy vấn theo dạo object (viết giống sql) 
+-> 
+LinQ (dễ viết)  --- chuyển đổi thành ADO.Net ----> DB
+
+nhận về ghép dữ liệu là 1 object rồi nhận dữ liệu object khác về
+
+NÂNG CAO HƠN NỮA là FRAMWORK:
+Entity framework dựa trên LinQ ( khó phân biệt LinQ và Entity fw ) 
+điểm chung: sử dụng các object, class để làm việc 
+
+
+Entity FW thì level cao hơn -> framework hoàn trình của ORM -> Tạo ra sự quan hệ đầy đủ với các entity với nhau ...
+cung cấp nhiều tính năng trong quan hệ các entity 
+
+
+ORM -> object relationship mapping 
+
+
+Code First và DB First là hai cách tiếp cận khác nhau để phát triển ứng dụng .NET sử dụng Entity Framework:
+
+Code First là: Một cách tiếp cận viết mã ( ta sẽ viết mã cho các class mô hình trước khi tạo CSDL)
+     -> entity framework sẽ auto create CSDL dựa trên mô hình của ta 
+DB First: Một cách tiếp cận ( là cách tiếp cận mà ta cần tạo CSDL trước và sau đó mới viết mã cho các class mô hình )
+     -> entity framework sẽ sử dụng các thông tin từ CSDL để tạo các class mô hình cho bạn 
+Điểm giống nhau:
++ Cả 2 đều sử dụng Entity Framework để truy cập CSDL 
++ Cả 2 cách tiếp cận đều cho phép ta tạo các class mô hình có thể tái sử dụng
++ Cả 2 cách tiếp cận đều cho phép bạn tạo các ứng .NET mạnh mẽ & hiệu quả!
+
+
+Điểm khác nhau:
++ Trình tự:
+ -> code first viết mã cho các class mô hình trước khi tạo CSDL
+ -> DB first tạo CSDL trước khi viết mã cho các class mô hình
+
++ Độ linh hoạt:
+ -> Code first linh hoạt hơn ( cho phép ta thay đổi CSDL mà ko cần thay đỏi mã )
+ -> ít linh hoạt hơn cần thay đổi mã nếu như ta thay đổi CSDL 
++ khả năng tái sử dụng:
+ -> Code first có thể tái sử dụng hơn, các class ko phụ thuộc vào CSDL cụ thể
+ -> DB first ít tái sử dụng, các class mô hình PHỤ THUỘC vào CSDL cụ thể
++ Thời gian phát triển:
+ -> mất nhiều time to create CSDL từ các class mô hình
+
+
+
+
+
+Thầy giải thích:
+hướng tiếp cận viết code cho dự án
+
+tuỳ vào dự án ta sẽ có các hướng tiếp cận khác nhau 
+code first:
+code trước, db có sau
+từ các class -chuyển-> table trong database
+=> all DB sẽ đc quản lý bằng 1 bộ mã nguồn
+nhược điểm: code first chỉ sử dụng trong dự án nhỏ
+
+db first:
+db có trước, code sau
+table có sẵn -> mới viết code ( hệ thống nhỏ mất nhân lực về database ) Sử dụng cho hệ thống to
+* phải có người quản lý DB 
+
+
+Bây giờ toàn làm việc với ORM hết  ( với model )
+vào tool -> nuGet package Manager -> Manage NuGet package ...
+nuget packages solution
+tải:
+Microsoft Entity framework core 7.0.10
+Microsoft entity FrameworkCore.SQLserver (làm việc với sql server) 7.0.10
+
+
+Microsoft Entity framework core.design  // tham chiếu các table với nhau 
+Microsoft Entity framework core.tools   // các lệnh migrate với nhau chuyển đổi 2 hướng tiếp cận vs DB 
+
+ORM cần 1 thực mục làm việc với DB -> add folder entities và tạo các table bên trong 
+
+
+
+
+
+Tạo code first connect to DB:
+vào app.setting tạo dường dẫn trước :"Data Source=DESKTOP-DKL7C0F\\SQLEXPRESS;Initial Catalog=T2207A;Integrated Security=True;TrustServerCertificate=true"
+tạo file DataContext trong folder entities
+cấu hình trong file appsetting.json -> khai báo file datacontext + với đường dẫn ở trên
+sau đó khi tạo các entities xong ta tạo file datacontext ta phải khai báo các entities mà ta tạo như product, category...
+
+
+
+
+
+
+Lấy collection string:
+vào view -> vào server explorer 
+copy name DB SQL SERVER vào field cần là: "DESKTOP-DKL7C0F\SQLEXPRESS"
+ sau đó nó sẽ tự hiện option lựa chọn name DB
+ấn "OK" 
+_ ở phần bên tay trái màn hình lựa chuỗi phải vào "desktop-dkl7c0f ..." trong folder Data Connections
+sau đó ở phần góc phải dưới màn hình copy chuỗi connectString vào:
+"Data Source=DESKTOP-DKL7C0F\\SQLEXPRESS;Initial Catalog=T2207A;Integrated Security=True;TrustServerCertificate=true"
+sau đó thêm đoạn: "TrustServerCertificate=true" vào! 
+
+Bước: Từ class (model) tạo CSDL trong DATABASE
+
+nuGet package terminal: gõ liên quan đến package nó khác với các terminal khác là gõ liên qua đến file
+tools -> nuget package manager -> package manage console 
+gõ: add-migration t2207a
+-> tự động sinh migration (ORM bậc cao)
+gõ: update-database
+-> tự động tạo bảng trong CSDL 
+terminal: gõ bình thường
+update lại thì tự động:
+gõ: update-database
+
+* nếu tạo bảng mới phải xoá hết DB và chạy ại các bước Từ class (model) tạo CSDL trong DATABASE
+xoá hết DB, xoá folder Migration trong dự án -> làm lại các bước trên để thêm bảng 
+=> bước code first!
+
+
+// cái collection string viết trong programe.cs
+-> nếu để thế này mà deploy thì sẽ lỗi vì
+các cấu hình liên quan đến kết nối -> thì ta phải đưa đến nơi khác! 
+.net java -> 
+
+
+
+model -> controller -> view 
+*@Html.DropDownListFor(m=>m.category_id, )
+var selectCategories = new List<SelectListItem>();
+forEach(var c in categorues){
+ selectCategories
+}
+
+
+
+ORM chính xác liên kết để lấy dữ liệu:
+nạp vào từ relationship 
+
+using entity.frameworkcore;
+private readonly DataContext _context;
+List<product> products = _context.Products
+	.Include(p=>p.category).toList(); // nạp thêm dữ liệu vào
+	.Where(p=>p.name.Equals("samsung")); // lấy dữ liệu có sam sung so sánh chính xác
+	.Where(p=>p.name.Contains("samsung") || p.name.Contains("apple")); // lấy dữ liệu có từ sam sung
+	.Take(10) //
+	.Skip(5) // phải tự nhớ công thức phân trang 
+	.OrderBy(p=>p.name)//ascending
+	.OrderByDescending(p=>p.name)//descending
+
+fiter, sorting, search, pagination ... 
+
+
+số lượng phân trang - 1 * limit
+
+CHỨC NĂNG UPLOAD FILES:
+
+controller:
+using: 
+public IActionResult Index(){
+return View();
+}
+
+// NHẬN ẢNH!
+// có 2 kiểu nhận tham só 1 là nhận qua model 
+//2 là nhận qua tham số IFormFile
+[HttpPost]
+public IActionResult Index(IFormFile image){
+
+if( image == null ){
+	return BadRequest();
+}
+
+string path = "wwwroot/uploads";
+string filename = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+var upload = Path.Combine( Directory.GetCurrentDirectory(), path, fileName );
+image.CopyTo(new FileStream(upload, FileMode.Create));
+string url = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}"; // đoạn này dùng để gửi kết quả trả về
+return Ok(url);
+
+}
+
+ folder wwwroot/uploads -> dùng để lưu trữ ảnh
+
+
+//Guid.NewGuid().ToString() lấy tên ngẫu nhiên
+// cộng với cái đuôi của nó: Path.GetExtension(image.FileName)
+
+
+
+
+
+view: folder: upload
+index.cshtml
+
+// up vào action controller
+@using(Html.BeginForm(FormMethod.Post, new { enctype="multipart/form-data" })) // update với method Post enctype"..."
+{
+
+<input type="file" name="image" class="form-control" />
+<button type="submit" class="btn btn-primary">Submit</button>
+
+}
+
+
+
+
+                       HỌC ASP WEB API CORE (importance)
+
+client sẽ ko nhìn thấy backend -> phải xoá swagger đi!
+
+web service API nó là cái gì?
+-> nó là: URL 
+-> return text JSON (trả về chuẩn REST API) | text XML (trả về chuẩn SOAP API khó tạo sử dụng cho cái core -> khả năng bảo mật cao)
+-> Dạng dịch vụ gọi là Service
+
+=> giúp chúng ta giao tiếp được với 2 thằng application khác nhau! 
+
+B1 TẠO DB trong sql server
+-> tạo product, category 
+
+
+EMAIL -> CHO NHÂN VIÊN & CLIENT(ĐỂ ĐĂNG NHẬP)
+USERNAME -> QUẢN LÝ (DÙNG ĐỂ ĐĂNG NHẬP)
+
+ĐÂY LÀ DATABASE:
+
+use web_api_class3
+
+Running_shop
+
+create table categories(
+	id int PRIMARY KEY  IDENTITY(1, 1),
+	name varchar(255) not NULL UNIQUE
+);
+
+create table products(
+	id int PRIMARY KEY IDENTITY(1, 1),
+	name varchar(255) NOT NULL,
+	price DECIMAL(14, 2) not NULL CHECK(price >= 0),
+	description TEXT,
+	thumbnail varchar(255),
+	qty int not null CHECK(qty >= 0) DEFAULT 0,
+	category_id int not null FOREIGN KEY REFERENCES categories(id),
+	createDate Datetime not null,
+	user_id int not null FOREIGN KEY REFERENCES users(id)
+);
+
+create table colors(
+   id int PRIMARY KEY IDENTITY(1, 1),
+   name varchar(50) NOT NULL
+);
+
+create table genders(
+	id int PRIMARY KEY INDENTITY(1, 1),
+	name varchar(50) NOT NULL
+);
+
+create table size_P(
+       id int PRIMARY KEY INDENTITY(1, 1),
+	name varchar(10) NOT NULL
+);
+
+
+create table brand(
+	id int PRIMARY KEY INDENTITY(1, 1),
+	name varchar(50) NOT NULL
+)
+
+// khách hàng
+create table users(
+	id int PRIMARY KEY IDENTITY(1,1),
+	fullname varchar(255) not null,
+	email varchar(255) NOT NULL UNIQUE,
+	avatar VARCHAR(255),
+	tel VARCHAR(20),
+	address varchar(255),
+	city varchar(100),
+	password varchar(250) NOT NULL,
+        role varchar(10) NOT NULL
+);
+
+// quản lý nhân viên:
+create table staffs(
+	id int PRIMARY KEY IDENTITY(1,1),
+	username varchar(255) not null,
+	avatar VARCHAR(350),
+	password varchar(250) NOT NULL,
+	role varchar(10)
+);
+
+CREATE TABLE carts(
+	user_id int FOREIGN KEY REFERENCES users(id),
+	product_id int FOREIGN KEY REFERENCES products(id),
+	buy_qty int not null check(buy_qty>0) DEFAULT 1,
+);
+
+
+CREATE TABLE orders(
+	id int PRIMARY KEY IDENTITY(1, 1),
+	user_id int FOREIGN KEY REFERENCES users(id),
+	created_at DATETIME not NULL,
+	grand_total DECIMAL(14, 2) NOT NULL CHECK(grand_total>=0),
+	shipping_address varchar(255),
+	city varchar(100),
+	tel varchar(20),
+	payment_method VARCHAR(10),
+	invoice_id varchar(20) NOT NULL UNIQUE,
+	status int NOT NULL DEFAULT 1
+);
+
+
+// hoá đơn thanh toán
+create TABLE order_products_detail(
+	product_id int FOREIGN KEY REFERENCES products(id),
+	order_id int not null FOREIGN KEY REFERENCES orders(id),
+	buy_qty int not null check(buy_qty>0) DEFAULT 1,
+	price DECIMAL(14, 2) not null CHECK(price >= 0)
+)
+
+// product của nhóm 
+create table products(
+	id int PRIMARY KEY IDENTITY(1, 1),
+	name varchar(255) NOT NULL,
+	price DECIMAL(14, 2) not NULL CHECK(price >= 0),
+	description TEXT,
+	thumbnail varchar(255),
+	qty int not null CHECK(qty >= 0) DEFAULT 0,
+	category_id int not null FOREIGN KEY REFERENCES categories(id),
+	createDate Datetime not null,
+	user_id int not null FOREIGN KEY REFERENCES users(id),
+	gender_id int not null FOREIGN KEY REFERENCES genders(id),
+	brand_id int not null FOREIGN KEY REFERENCES brand(id),
+	size_id int not null FOREIGN KEY REFERENCES size(id),
+	color_id int not null FOREIGN KEY REFERENCES colors(id)
+);
+
+
+insert into RefreshToken(userId, token, jwtId, isUsed, isRevoked, isUsedAt, expiredAt) VALUES(1, 'HVBNMtgyuisfghj123', '12345gfds', 0, 0, '2008-11-11', '2008-11-11')
+
+select * from RefreshToken;
+
+
+
+create table statistical(
+    id int PRIMARY KEY INDENTITY(1, 1),
+    product_id int FOREIGN KEY REFERENCES products(id),
+    quantity_sold int default 0
+)
+
+--type boolean BIT -> insert 1 or 0 in type
+CREATE TABLE RefreshToken(
+	id int PRIMARY KEY IDENTITY(1, 1),
+	userId int not null FOREIGN KEY REFERENCES User2(id),
+	token varchar(500) not null,
+	jwtId varchar(255) not null,
+	isUsed BIT DEFAULT 0,
+	isRevoked BIT DEFAULT 0,
+	isUsedAt Datetime,
+	expiredAt Datetime
+)
+
+
+
+// insert dữ liệu:
+insert into products(name, price, description, thumbnail, qty, category_id) 
+VALUES('sam sung', 1000, 'this is new product', 'https://liftlearning.com/wp-content/uploads/2020/09/default-image.png', 5, 2),
+('poppy', 500, 'a shiba', 'https://liftlearning.com/wp-content/uploads/2020/09/default-image.png', 5, 5)
+
+
+
+NẾU MUỐN SỬA LẠI DATABASE THÌ:
+1. sửa lại dữ liệu trên database
+2. vào project mở package manager console
+đưa vào đoạn code là:
+Scaffold-DbContext "Tên database;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Tên_folder_chứa_entities -Force
+câu lệnh đúng sẽ là:
+Scaffold-DbContext "Server=DESKTOP-DKL7C0F\SQLEXPRESS;Database=web_api_class3;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Force
+
+
+
+B2 CHUYỂN SANG CODE 
+_kết nối DB vào backend:
+vào file appsetting.json
+"AllowedHosts": "*",
+"ConnectionStrings": {
+  "API": "Data Source=DESKTOP-DKL7C0F\\SQLEXPRESS;Initial Catalog=web_api_class3;Integrated Security=True;TrustServerCertificate=true"
+}
+_ tạo thư mục Entities chứa các entities từ db vào
+
+_ cài đặt các framework cần cho dự án!
+vào tool -> nuGet package Manager -> Manage NuGet package ...
+nuget packages solution
+tải:
+Microsoft Entity framework core 7.0.10
+Microsoft entity FrameworkCore.SQLserver (làm việc với sql server) 7.0.10
+Microsoft.AspNetcore.Mvc.NewtonsoftJson
+
+
+Microsoft Entity framework core.design  // tham chiếu các table với nhau 
+Microsoft Entity framework core.tools   // các lệnh migrate với nhau chuyển đổi 2 hướng tiếp cận vs DB 
+
+
+B3 chuyển các bảng trong DB thành các dữ liệu trong entities ở backend   
+
+nuGet package terminal: gõ liên quan đến package nó khác với các terminal khác là gõ liên qua đến file
+tools -> nuget package manager -> package manage console 
+gõ: 
+
+_ tạo context theo DB bạn đã tạo từ trước vào thư mục Entities
+sửa lại đoạn: DESKTOP-DKL7C0F\\SQLEXPRESS   --sẽ thành-->    .\SQLEXPRESS
+copy vào ternminal package manager console:
+
+   Scaffold-DbContext "Data Source=.\SQLEXPRESS;Initial Catalog=web_api_class3;Integrated Security=True;TrustServerCertificate=true" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Force
+
+=> dữ liệu tự động tạo trong folder entities
+
+
+
+
+
+
+B4: kết nối DB cho thao tác dễ dàng hơn 
+trong file context của Entities -> thì ta sẽ comment đoạn code:
+  //  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+  //      => optionsBuilder.UseSqlServer("Data Source=.\\SQLEXPRESS;Initial Catalog=web_api_class3;Integrated Security=True;TrustServerCertificate=true");
+
+=> comment lại để chúng ta tạo kết nối trong file program.cs 
+khi mở project chúng ta sẽ connect DB dễ dàng hơn chứ ko phải chạy lại câu lệnh để connect
+
+vào flie:  Program.cs
+khai báo:  using Microsoft.EntityFrameworkCore;
+
+               // Lấy đoạn string API bên file appSetting.json
+string connectionString = builder.Configuration.GetConnectionString("API");
+builder.Services.AddDbContext<Backend_API_Class_sem3.Entities.WebApiClass3Context>(
+		options => options.UseSqlServer(connectionString)
+);
+
+
+
+
+
+
+B5 XÂY DỰNG BỘ API CRUD
+_ tạo file categoryController trong controllers:
+
+
+model là nơi kiểm soát dữ liệu lên model và lấy dữ liệu về
+ model(control tham số gửi lên từ client) -> emtity -> DTO(data transfer object)
+
+Models: lấy dữ liệu từ client gửi lên ---- đưa vào trong controller đễ xử lý -----> contrller lấy dữ liệu
+DTO: lấy dữ liệu từ controller là một object lớn và sẽ xử lý và trả về dữ liệu đủ mà client yêu cầu
+
+
+// SỬA DỮ LIỆU TỪ DB -> BE
+nghĩa là bây giờ tôi sẽ phải sửa lại dữ liệu trong database sql server, sau đó vào project mở "Package Manager Console" và gõ lệnh:
+
+Scaffold-DbContext "Server=DESKTOP-DKL7C0F\SQLEXPRESS;Database=web_api_class3;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Force
+
+
+
+DẠNG DB FIRST (ko phải code first)
+ _ sử dụng cho hệ thống lớn -> ASP CORE 
+
+
+
+
+
+
+SRS --- DB Diagram
+
+backend có 
+quản trị -> nhân viên 
+_ quản lý đơn hàng( chỉnh sửa địa chỉ... thông tin khách hàng CRUD quản lý đơn hàng )
+_ tìm kiếm sản phẩm 
+_ Nhân viên xác nhận lại hàng
+
+quản trị(xem quán lý lỗ lãi) -> cho giám đốc
+_ CRUD
+_ Phân quyền 
+_ create nhân viên 
+_ full options
+
+sử dụng sản phẩm -> client -> client
+_ update trạng thái huỷ bỏ cho đơn hàng 
+_ create chính bản thân nó, update bản thân nó
+
+
+
+
+
+thống kê báo cáo:
+_ quản lý doanh thu -> trả dữ liệu vào bảng
+_ quản lý best sale product
+
+
+
+Phân quyền sẽ xử lý sau!
+
+backend 
+ASP.NET CORE (WEB SERVICE API)
+frontend REACT JS
+
+
+pending( đang xử lý ) -> nhân viên xác nhận hàng 
+transfer ( chờ lấy hàng )
+cancel 
+success
+
+
+
+dự án backend node js:
+E:\tip_javascript\Backend_tipjs>
+
+tạo folder 
+npx create-react-app T2207A_FE
+npm start
+
+Server rendering -> view engine (ejs node, rezor view c# ...) sang trang là tải lại một lần
+SPA-> ứng dụng một trang (react) tải một lần duy nhất
+
+cài một cái package là:
+npm i react-router-dom
+-> package dùng để chuyển router
+
+mục đích là để
+
+thay vì thẻ a ta sẽ dùng NavLink của framework ta vừa tải về để chuyển router cho mượt
+
+app.js:
+ <Routes>
+              <Route path='/' element={<Home/>} />
+              <Route path='/shop' element={<Shop/>} />
+        </Routes>
+page header.js:
+<NavLink to="/">Home</NavLink>
+ <NavLink to="/shop">Shop</NavLink>
+
+
+
+useEffect lắng nghe những thay đổi của state... để khi có thay đổi 
+construct -> will mount (sk trc khi sinh ra giao diện) -> render -> did mount (sk sinh ra sau khi kết thúc giao diện)
+
+did mount( lấy data về) -> khi state thay đổi -> render (chạy lại) -> useEffect sẽ chạy
+
+
+useEffect(1 function, danh sách các states cần lắng nghe)
+useEffect( ()=>{
+	console.log('a')
+}, [categoryState] )
+=> nếu state category mà chạy thi useEffect nó sẽ chạy console.log(a)
+-> vừa vào giao diện constructor chạy -> state category chạy -> useEffect bên trong chạy
+
+
+useEffect( ()=>{
+}, [] ) -> useEffect ko có state thì nó sẽ chạy một lần duy nhất 
+-> vừa vào giao diện constructor chạy -> state chạy -> useEffect bên trong chạy
+call api( dùng fetch ) -> set vào state category -> hàm useEffect chạy (1 lần duy nhất vì ta ko đưa vào state nào trong tham số thứ 2)
+
+
+
+
+
+
+
+// backend chặn frontend ko cho truy cập dữ liệu:
+
+
+ file program.cs:
+add CORS policy ACCESS:
+builder.Services.AddCors( options =>{
+	options.AddDefaultPolicy( policy =>
+		policy.WithOrigin("https://24h.com"); 
+		policy.AllowAnyOrigin(); //allow all url
+		policy.AllowAnyMethod(); //allow các method GET PUT POST
+		policy.AllowAnyHeader(); // allow các headers nhận dữ liệu lên BE
+	)
+} )
+
+// cho phép BE nó sử dụng cors
+app.useCors();
+ => ko giống như node sd framework cấu hình chỉ việc app.use(cors) asp nó sẽ cấu hình một function rồi gọi lại ở dưới để sử dụng.
+
+
+
+// ADD CORS for access other link:
+builder.Services.AddCors( options =>
+{
+	options.AddDefaultPolicy(policy =>
+		{
+			policy.AllowAnyOrigin()
+				.AllowAnyMethod()
+				.AllowAnyHeader();
+		});
+});
+
+
+app.UseCors();
+
+
+
+
+php -> server rendering  --- monolithic
+BE - FE -> có nhiều cách giao tiếp
+BE( chia service layer -> chia controller cho website & mobile app về tính policy ) -> FE( Website - mobile app )
+
+
+// mở lại thanh chứa các services, models, controllers
+
+
+flutter( DART )'s google viết mobile
+Hybrid -> web view mobile + web
+
+
+BUỔI MỚI:
+
+tập trung react hoàn thành luồng frontend:
+
+sử dụng axios: npm i axios 
+cung cấp nhiều tính năng phục vụ tiên hơn so với fetch ... ví dụ như gửi token ...
+
+
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+ [HttpPost]
+        public IActionResult Index(IFormFile image)
+        {
+            if(image == null)
+            {
+                return BadRequest("Vui lòng chọn file");
+            }
+            string path = "wwwroot/uploads";
+            string fileName = Guid.NewGuid().ToString()
+                    + Path.GetExtension(image.FileName);
+            var upload = Path.Combine(Directory.GetCurrentDirectory(),
+                path, fileName);
+            image.CopyTo(new FileStream(upload, FileMode.Create));
+            string url = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+            return Ok(url);
+        }
+
+
+ [HttpPost]
+        public IActionResult Create(CreateProductModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+	string path ="wwwroot/uploads";
+
+	string filename = Guid.NewGuid().ToString()
+                    + Path.GetExtension(image.FileName);
+
+	var upload = Path.Combine(Directory.GetCurrentDirectory(),
+                path, fileName);
+
+	model.image.CopyTo(new FileStream(upload, FileMode.Create));
+	
+	string url = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+
+                _context.Products.Add(new Product {
+                    name = model.name,
+                    price = model.price,
+                    description = model.description,
+                    category_id = model.category_id,
+		    image = url // xử lý lấy đường dẫn file đưa vào đây
+                    });
+                _context.SaveChanges();
+                return Ok();
+            }
+            
+        }
+    }
+
+
+
+namespace T2207A_MVC.Models.Product
+{
+	public class ProductViewModel
+	{
+		[Required]
+		public string name { get; set; }
+        [Required]
+        public double price { get; set; }
+        [Required]
+        public string description { get; set; }
+        [Required]
+        [Display(Name ="Category")]
+        public int category_id { get; set; }
+	}
+	[Required]
+	public IFormFile image {get; set;}
+}
+
+
+namespace T2207A_MVC.Models.Product
+{
+	public class ProductViewDTO
+	{
+		[Required]
+		public string name { get; set; }
+        [Required]
+        public double price { get; set; }
+        [Required]
+        public string description { get; set; }
+        [Required]
+        [Display(Name ="Category")]
+        public int category_id { get; set; }
+	}
+	[Required]
+	public string image {get; set;}
+}
+
+
+[HttpPost] 
+public IActionResult Create(CreateProductModel model) {
+
+if (ModelState.IsValid) {     // Giả sử model.image là một chuỗi base64 
+var imageBytes = Convert.FromBase64String(model.image); 
+var path = “wwwroot/uploads/img”; 
+var fileName = Guid.NewGuid().ToString() + “.jpg”;
+var filePath = Path.Combine(path, fileName); 
+File.WriteAllBytes(filePath, imageBytes);
+ 
+//tiếp tục xử lý các trường khác của model:
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+tạo cauroser:
+
+vào file css kiểm tra xem ta đang dùng boostrap bao nhiêu:
+public -> css -> boostrap.min ...
+
+vào boostrap của react phiên bản đúng mình cần ấn tải boostrap react về:
+npm install react-bootstrap bootstrap@4.6.0
+
+copy carousel vào đoạn  mình cần:
+import { Carousel } from "boostrap...";
+ <Carousel>
+  <Carousel.Item>
+    <img
+      className="d-block w-100"
+      src="holder.js/800x400?text=First slide&bg=373940"
+      alt="First slide"
+    />
+    <Carousel.Caption>
+      <h3>First slide label</h3>
+      <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+    </Carousel.Caption>
+  </Carousel.Item>
+  <Carousel.Item>
+    <img
+      className="d-block w-100"
+      src="holder.js/800x400?text=Second slide&bg=282c34"
+      alt="Second slide"
+    />
+
+    <Carousel.Caption>
+      <h3>Second slide label</h3>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </Carousel.Caption>
+  </Carousel.Item>
+  <Carousel.Item>
+    <img
+      className="d-block w-100"
+      src="holder.js/800x400?text=Third slide&bg=20232a"
+      alt="Third slide"
+    />
+
+    <Carousel.Caption>
+      <h3>Third slide label</h3>
+      <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+    </Carousel.Caption>
+  </Carousel.Item>
+</Carousel>
+
+
+
+
+cách bind lấy dữ liệu & click để ẩn or hiện thanh dữ liệu:
+B1: TẠO STATE THAY ĐỔI DỮ LIỆU:
+import { useEffect, useState } from "react";
+1. state để lấy dữ liệu: lấy dữ liệu sẽ là một mảng vì vậy đưa vào useState là 1 mảng
+   const [categories, setCategories] = useState([]);
+2. state để hiện thị dữ liệu: đóng or mở tương đương với false or true
+    const [show, setShow] = useState(false)
+
+B2: Tạo một async await sử dụng axios để lấy dữ liệu về và bind vào State 1:
+import api from "../../services/api";
+import url from "../../services/url";
+const loadProduct = async ()=>{
+        try{
+           const rs = await api.get(url.FAKE_PRODUCT);
+           setCategories(rs.data);
+        }catch(e){
+
+        }
+    }
+B3: SỬ DỤNG useEffect để khi state thay đổi thì useEffect sẽ chạy một lần duy nhất:
+useEffect( ()=>{
+        loadProduct();
+}, [])
+
+B4: SỬ DỤNG MAP ĐỂ LẤY DỮ LIỆU:
+_ từ array của useState lấy dữ liệu ta gọi đến map để lấy dữ liệu:
+{
+       categories.map( (e, i)=>{
+               return(
+                    <li key={i}>
+                           <NavLink to={`/category/${e.id}`}>{e.title}</NavLink>
+                    </li>
+                                    )
+                                } )
+}
+
+B5: THỰC HIỆN CLICK HIỆN OR ẨN Block:
+_ trong thẻ bao của dữ liệu hiện ra ta sẽ sử dụng attribute: "style" để css cho thẻ ul
+_ css cho thẻ ul thuộc tính display: true or false bằng cách đưa state và toán tử operator vào:
+<ul style={{display:show?"block":"none"}}></ul> 
+
+B6: ADD EVENT CLICK VÀO THẺ TAG MÀ TA MUỐN ẨN OR HIỆN BLOCK:
+_ Sử dụng anonymous function để thực hiện một hành động khi click vào thành phần thì func sẽ chạy:
+
+<div className="hero__categories__all" onClick={ ()=>{setShow(!show)} }>
+
+_ function sẽ xử lý: set lại state cho state ẩn hiện tức (true, false)
+_ setShow(!show) nghĩa là nêu "show" == true thì !show == false ... 
+
+BÀI MỚI:
+
+Lấy dữ liệu đưa ra view:
+
+// TRẢ VỀ DỮ LIỆU ĐƯA VÀO Mdto
+List<DTO> ls = new List<DTY>();
+forEach(Product p in products){
+
+ls.Add(new DTO {
+   id = p.Id,
+   name = p.name,
+   ...
+   category = new categoryDTO{
+          id = p.category.Id
+	  name = p.category.Name
+   }
+})
+}
+
+LỖI null reference exception là ta chưa truyền Entities vào!
+
+
+
+GỌI data và đưa vào:
+
+
+
+
+Lỗi 
+var a = {
+  key: value,
+  key: {
+    name: value
+  }
+}
+a.key.name 
+lỗi
+read properties reading name
+bởi vì lần đâu tiên khi set state thì state sẽ là undefine vì giá trị từ đầu là undefine:
+
+[state, setState] = useState({
+    name: {},
+    state_qty: 1
+})
+
+<input onchange={changeQty} />
+
+
+const changeQty = (e)=>{
+// e chính là sự kiện onchange:
+  var result = e.target.value;
+  setProduct({ ...product, state_qty:v })   //  giải dữ liệu cũ vào nhưng trường dữ liệu mới thì thay đổi là qty: v
+   
+}
+
+
+
+
+* .useParams() trong react để lấy id 
+
+
+2 components ko liên quan muốn sử dụng biến chung: global state (local, private) -> tác động cho toàn bộ components
+global state kho lưu trữ chung áp dụng cho all components 
+-> thằng nào lắng nghe auto được thay đổi dữ liệu
+
+tự động -> cập nhật nhanh chóng
+
+context
+redux
+
+
+ 
+
+
+
+
+
+Lỗi tràn dữ liệu trả về trong khi lấy các sản phẩm related: 
+-> khi trả về dữ liệu nhiều quá ta sẽ bị chàn dữ liệu 
+
+
+
+Json.JsonException serialCycle | serialize cycle => để sử dụng được ta cần cài thư viện:
+vào tool -> tải thư viện:
+       Microsoft.AspNetcore.Mvc.Newtonsoft.json
+
+nó có hình giống với mấy cái thư viện trc tải
+
+trong asp nó sẽ cho json nhưng nó giới hạn -> nếu vượt quá nó ko cho phép -> vì vậy ta cần có thêm các thư viện
+hỗ trợ để mở rộng json ...
+
+=> trong Program.json phải add thư viện NewtonSoft.json
+
+// cấu hình lại cho nó trong DI container để nó affect vào controller ko còn giới hạn dữ liệu: 
+// add services container:
+
+builder.Services.AddControllers().AddNewtonsoftJson( options => 
+options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore );
+
+
+insert into table(name, description, thumbnail ... ) VALUES (..., ..., ..., ...),(..., ..., ..., ...)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ 
+List<product> products = _context.Products
+	.Include(p=>p.category).toList(); // nạp thêm dữ liệu vào
+	.Where(p=>p.name.Equals("samsung")); // lấy dữ liệu có sam sung so sánh chính xác
+	.Where(p=>p.name.Contains("samsung") || p.name.Contains("apple")); // lấy dữ liệu có từ sam sung
+	.Take(10) //
+	.Skip(5) // phải tự nhớ công thức phân trang 
+	.OrderBy(p=>p.name)//ascending
+	.OrderByDescending(p=>p.name)//descending 
+
+ 
+.include() là: kỹ thuật Eager Loading, tức là tải trước các dữ liệu liên quan khi truy vấn entity chính.
+=> giúp cho Điều này giúp bạn có thể truy cập đến các thuộc tính của entity liên quan mà không cần phải thực hiện một truy vấn khác
+ */
+
+
+
+
+có sẵn trong react: chúng ta muốn sd global state sẽ đc cập nhật khi dữ liệu sẽ đc update
+state chung chứa cho all project của mình 
+khi khởi tạo ta gói nói cho phạm vi toàn components có 2 cơ chế đọc và ghi state setState
+
+
+reducer -> khai báo các cái thao tác với một cái sate -> sd đê phân loại công việc sẽ làm với global state
+mục đích là khi ta sd công việc gì thì ta sẽ làm mục đích riêng 
+
+tài khoản azure:
+anhvietanh
+anhduc1999@
+
+
+
+
+20 -> phần tử 
+
+3 phần tử 1 trang 
+
+page_size = 3 độ dài của phần tử trong 1 page
+
+page = 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
