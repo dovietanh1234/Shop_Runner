@@ -9,7 +9,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         ProductDetail GetDetail(int id);
 
-        ProductGetAll AddProduct(CreateProduct product);
+        ProductGetAll AddProduct( CreateProduct product);
 
         void UpdateProduct(EditProduct product);
 

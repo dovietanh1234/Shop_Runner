@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using SHOP_RUNNER.Common;
 using SHOP_RUNNER.DTOs.Brand_DTO;
 using SHOP_RUNNER.DTOs.Category_DTO;
@@ -22,14 +23,31 @@ namespace SHOP_RUNNER.Services.ProductRepo
         }
 
         // Xong add
-        public ProductGetAll AddProduct(CreateProduct product)
+        public ProductGetAll AddProduct(CreateProduct product )
         {
+            #region HANDLE THUMBNAIL
+            // handle file:
+            string path = "Uploads/Images";
+            string filename = Guid.NewGuid().ToString() + Path.GetExtension( product.Thumbnail.FileName );
+            var upload = Path.Combine(  Directory.GetCurrentDirectory(), path, filename );
+
+            product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
+
+            // using ( var fileStream = new FileStream(upload, FileMode.Create))
+            //{ product.thumbnail.CopyTo(fileStream); }
+            
+
+
+            string url = $"/Uploads/Images/{filename}";
+            #endregion
+
+
             Product new_Product = new Product()
             {
                 Name = product.Name,
                 Price = product.price,
                 Description = product.description,
-                Thumbnail = product.thumbnail,
+                Thumbnail = url, // neu ko co anh la 
                 Qty = product.qty,
                 CategoryId = product.category_id,
                 CreateDate = DateTime.Now,
@@ -107,8 +125,6 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             return ListDTO;
         }
-
-
 
 
 
@@ -258,12 +274,26 @@ namespace SHOP_RUNNER.Services.ProductRepo
         {
             var product_new = _context.Products.FirstOrDefault(p => p.Id == product.Id);
 
-            if(product_new != null)
+
+            #region HANDLE THUMBNAIL
+            // handle file:
+            string path = "Uploads/Images";
+            string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
+            var upload = Path.Combine(Directory.GetCurrentDirectory(), path, filename);
+
+            product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
+
+            string url = $"/Uploads/Images/{filename}";
+            #endregion
+
+
+
+            if (product_new != null)
             {
                 product_new.Name = product.Name;
                 product_new.Price = product.price;
                 product_new.Description = product.description != ""?product.description : product_new.Description;
-                product_new.Thumbnail = product.thumbnail!=""?product.thumbnail : product_new.Thumbnail;
+                product_new.Thumbnail = product.Thumbnail!= null? url : product_new.Thumbnail;
                 product_new.Qty = product.qty;
                 product_new.CategoryId = product.category_id;
                 product_new.GenderId = product.gender_id;
@@ -307,7 +337,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
 
 
-        // filter đang hỏng!
+       
        public List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color)
         {
             // THỰC HIỆN TẠO MỘT TRUY VẤN CÓ THỂ HOLD ĐỢI CÁC THUỘC TÍNH KHÁC  (bằng cách sd hàm .AsQueryable() ) LẤY VỀ ALL DATA

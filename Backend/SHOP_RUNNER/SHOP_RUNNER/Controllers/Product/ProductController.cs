@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SHOP_RUNNER.Entities;
 using SHOP_RUNNER.Models.Product_Model;
 using SHOP_RUNNER.Services.ProductRepo;
 
@@ -44,6 +45,7 @@ namespace SHOP_RUNNER.Controllers.Product
             }
         }
 
+        // SỬA
         [HttpPut("{id}")]
         public IActionResult updateP(int id, EditProduct product)
         {
@@ -62,8 +64,9 @@ namespace SHOP_RUNNER.Controllers.Product
 
         }
 
+   
         [HttpPost]
-        public IActionResult AddP(CreateProduct product) {
+        public IActionResult AddP([FromForm]CreateProduct product) {
             try
             {
                 return Ok(_IProductRepo.AddProduct(product));
@@ -71,6 +74,20 @@ namespace SHOP_RUNNER.Controllers.Product
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+
+        [HttpPost]
+        [Route("upload-image")]
+        public IActionResult UploadImage([FromForm]IFormFile image) {
+            string path = "Uploads/Images";
+            string filename = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+            var upload = Path.Combine(Directory.GetCurrentDirectory(), path, filename);
+
+            image.CopyTo(new FileStream(upload, FileMode.Create));
+
+            string url = $"/Uploads/Images/{filename}";
+            return Ok(url);
         }
 
         [HttpGet]

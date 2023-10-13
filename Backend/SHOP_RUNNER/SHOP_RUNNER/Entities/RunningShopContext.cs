@@ -33,13 +33,11 @@ public partial class RunningShopContext : DbContext
 
     public virtual DbSet<Size> Sizes { get; set; }
 
-    public virtual DbSet<Staff> Staffs { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=.\\SQLEXPRESS;Initial Catalog=Running_shop;Integrated Security=True;TrustServerCertificate=true");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-DKL7C0F\\SQLEXPRESS;Database=Running_shop;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -264,31 +262,6 @@ public partial class RunningShopContext : DbContext
                 .HasColumnName("name");
         });
 
-        modelBuilder.Entity<Staff>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__staffs__3213E83F137276F1");
-
-            entity.ToTable("staffs");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Avatar)
-                .HasMaxLength(350)
-                .IsUnicode(false)
-                .HasColumnName("avatar");
-            entity.Property(e => e.Password)
-                .HasMaxLength(250)
-                .IsUnicode(false)
-                .HasColumnName("password");
-            entity.Property(e => e.Role)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("role");
-            entity.Property(e => e.Username)
-                .HasMaxLength(255)
-                .IsUnicode(false)
-                .HasColumnName("username");
-        });
-
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__users__3213E83F5701C047");
@@ -318,10 +291,19 @@ public partial class RunningShopContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("fullname");
-            entity.Property(e => e.Password)
-                .HasMaxLength(250)
+            entity.Property(e => e.PasswordHash)
+                .HasMaxLength(64)
+                .IsFixedLength()
+                .HasColumnName("passwordHash");
+            entity.Property(e => e.PasswordResetToken)
+                .HasMaxLength(350)
                 .IsUnicode(false)
-                .HasColumnName("password");
+                .HasColumnName("passwordResetToken");
+            entity.Property(e => e.PasswordSalt)
+                .HasMaxLength(64)
+                .IsFixedLength()
+                .HasColumnName("passwordSalt");
+            entity.Property(e => e.ResetTokenExpires).HasColumnType("datetime");
             entity.Property(e => e.Role)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -330,6 +312,13 @@ public partial class RunningShopContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("tel");
+            entity.Property(e => e.VerificationToken)
+                .HasMaxLength(350)
+                .IsUnicode(false)
+                .HasColumnName("verificationToken");
+            entity.Property(e => e.VerifiedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("verifiedAt");
         });
 
         OnModelCreatingPartial(modelBuilder);

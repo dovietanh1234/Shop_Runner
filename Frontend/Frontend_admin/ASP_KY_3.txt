@@ -443,6 +443,17 @@ insert into RefreshToken(userId, token, jwtId, isUsed, isRevoked, isUsedAt, expi
 
 select * from RefreshToken;
 
+CREATE TABLE account(  
+   id int PRIMARY KEY INDENTITY(1, 1),
+   passwordHash BINARY(32) NOT NULL,
+   passwordSalt BINARY(32) NOT NULL,
+   VerificationToken VARCHAR(255),
+   VerifiedAt DATETIME,
+   PasswordResetToken VARCHAR(255),
+   ResetTokenExpires DATETIME,
+)
+
+ALTER TABLE user ADD account_id int not null FOREIGN KEY REFERENCES account(id);
 
 
 create table statistical(
@@ -461,6 +472,47 @@ CREATE TABLE RefreshToken(
 	isRevoked BIT DEFAULT 0,
 	isUsedAt Datetime,
 	expiredAt Datetime
+)
+
+//ALTER TABLE user ADD account_id int not null FOREIGN KEY REFERENCES account(id);
+
+ALTER TABLE user ALTER COLUMN password BINARY(32) NOT NULL;
+
+EXEC sp_rename 'user.password', 'passwordHash', 'COLUMN';
+
+ALTER TABLE users ADD passwordSalt BINARY(32) NOT NULL;
+
+// bat dau o day:
+ALTER TABLE users DROP COLUMN password;
+
+ALTER TABLE user ADD passwordSalt BINARY(32) NOT NULL;
+
+ALTER TABLE users ADD verificationToken VARCHAR(350) NOT NULL;
+
+ALTER TABLE users ADD verifiedAt Datetime;
+
+ALTER TABLE users ADD passwordResetToken string;
+
+ALTER TABLE users ADD ResetTokenExpires Datetime;
+
+ALTER TABLE users ALTER COLUMN passwordHash BINARY(32) NULL;
+
+-- Bước 1: Thêm một cột tạm thời
+ALTER TABLE users ADD password_temp BINARY(32);
+
+-- Bước 2: Chuyển đổi dữ liệu
+UPDATE users SET password_temp = CONVERT(BINARY(32), password);
+
+-- Bước 3: Xóa cột cũ
+ALTER TABLE users DROP COLUMN password;
+
+-- Bước 4: Đổi tên cột tạm thời thành tên cũ
+EXEC sp_rename 'users.password_temp', 'password', 'COLUMN';
+
+CREATE TABLE account(
+        id int PRIMARY KEY IDENTITY(1, 1),
+	passwordSalt BINARY(32) NOT NULL,
+        verificationToken VARCHAR(300)
 )
 
 
@@ -1108,9 +1160,23 @@ page = 2
 
 
 
+RefreshToken(
+   id int PRIMARY KEY IDENTITY(1, 1),
+   token VARCHAR(500) NOT NULL,
+   CREATE DateTime NOT NULL DEFAULTS(DATETIME.NOW()),
+   EXPIRES DateTime,
+)
+
+ALTER TABLE users ADD refreshToken VARCHAR(350) NOT NULL;
+
+ALTER TABLE users ADD TokenCreated DateTime;
+
+ALTER TABLE users ADD TokenExpired DateTime;
 
 
 
+trả về luôn cả refreshtoken lần accesstoken
+-> set refreshToken ở HttpOnly cookie -> to set for client will be auto refresh if access token expired
 
 
 

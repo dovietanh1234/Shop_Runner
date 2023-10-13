@@ -78,3 +78,7 @@ E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Microsoft.AspNet
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Newtonsoft.Json.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Newtonsoft.Json.Bson.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Scrutor.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
