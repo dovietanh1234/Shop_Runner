@@ -25,13 +25,15 @@ public partial class User
 
     public byte[] PasswordHash { get; set; } = null!;
 
-    public string VerificationToken { get; set; } = null!;
+    public string? RefreshToken { get; set; }
 
-    public DateTime? VerifiedAt { get; set; }
+    public DateTime? TokenCreated { get; set; }
 
     public string? PasswordResetToken { get; set; }
 
     public DateTime? ResetTokenExpires { get; set; }
+
+    public DateTime? TokenExpired { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 

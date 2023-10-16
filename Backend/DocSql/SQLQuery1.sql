@@ -53,7 +53,9 @@ DELETE FROM users where id = 14;
 
 --DELETE FROM products;
 
---DELETE FROM users;
+DELETE FROM users where id = 20;
+DELETE FROM users where id = 22;
+DELETE FROM users where id = 23;
 
 
 ALTER TABLE users ADD passwordHash BINARY(32) NOT NULL;
@@ -77,3 +79,18 @@ INSERT INTO users( fullname, email, role, passwordHash, passwordSalt, verificati
 VALUES ('tuan', 'anhtoankieu', 'ADMIN',0x0123456789ABCDEF, 0x0123456789ABCDEF, 'dfghjkcvbnmrtyu123456');
 
 SELECT * FROM products
+
+
+SELECT * FROM users
+
+
+ALTER TABLE users ADD TokenExpired Datetime;
+
+EXEC sp_rename 'users.verificationToken', 'refreshToken', 'COLUMN';
+EXEC sp_rename 'users.verifiedAt', 'TokenCreated', 'COLUMN';
+
+ALTER TABLE users ALTER COLUMN refreshToken VARCHAR(350);
+
+SELECT * FROM users where email = 'user@example.com';
+
+USE Running_shop

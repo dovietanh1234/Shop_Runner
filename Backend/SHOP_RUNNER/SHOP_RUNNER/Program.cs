@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using SHOP_RUNNER.Services.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,7 @@ builder.Services.AddControllers().AddNewtonsoftJson( options => options.Serializ
 
 // Khái báo interface Repository:
 builder.Services.AddScoped<IProductRepo, ProductClassRepo>();
+builder.Services.AddScoped<IEmailService, ClassEmailRepo>();
 
 // triển khai Authorization 403 or 401 :
 

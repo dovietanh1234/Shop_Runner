@@ -530,7 +530,7 @@ NẾU MUỐN SỬA LẠI DATABASE THÌ:
 đưa vào đoạn code là:
 Scaffold-DbContext "Tên database;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Tên_folder_chứa_entities -Force
 câu lệnh đúng sẽ là:
-Scaffold-DbContext "Server=DESKTOP-DKL7C0F\SQLEXPRESS;Database=web_api_class3;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Force
+Scaffold-DbContext "Server=DESKTOP-DKL7C0F\SQLEXPRESS;Database=Running_shop;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Force
 
 
 
@@ -1177,6 +1177,23 @@ ALTER TABLE users ADD TokenExpired DateTime;
 
 trả về luôn cả refreshtoken lần accesstoken
 -> set refreshToken ở HttpOnly cookie -> to set for client will be auto refresh if access token expired
+
+các câu lệnh sql:
+
+ALTER TABLE Quantrimang
+  ADD Luotxem FLOAT(10);
+
+ALTER TABLE Quantrimang
+  ADD Bientap VARCHAR(50),
+      Trangthai VARCHAR(50);
+
+ALTER TABLE ten_bang
+  ALTER COLUMN ten_cot kieu_cot;
+
+ALTER TABLE ten_bang
+  DROP COLUMN ten_cot;
+
+sp_rename 'ten_bang.ten_cot_cu', 'ten_cot_moi', 'COLUMN';
 
 
 

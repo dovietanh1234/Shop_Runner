@@ -300,9 +300,13 @@ public partial class RunningShopContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("passwordResetToken");
             entity.Property(e => e.PasswordSalt)
-                .HasMaxLength(64)
+                .HasMaxLength(128)
                 .IsFixedLength()
                 .HasColumnName("passwordSalt");
+            entity.Property(e => e.RefreshToken)
+                .HasMaxLength(350)
+                .IsUnicode(false)
+                .HasColumnName("refreshToken");
             entity.Property(e => e.ResetTokenExpires).HasColumnType("datetime");
             entity.Property(e => e.Role)
                 .HasMaxLength(10)
@@ -312,13 +316,8 @@ public partial class RunningShopContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("tel");
-            entity.Property(e => e.VerificationToken)
-                .HasMaxLength(350)
-                .IsUnicode(false)
-                .HasColumnName("verificationToken");
-            entity.Property(e => e.VerifiedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("verifiedAt");
+            entity.Property(e => e.TokenCreated).HasColumnType("datetime");
+            entity.Property(e => e.TokenExpired).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

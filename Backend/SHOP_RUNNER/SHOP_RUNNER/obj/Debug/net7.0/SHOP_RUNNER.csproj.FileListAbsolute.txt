@@ -82,3 +82,8 @@ E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Microsoft.AspNet
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Scrutor.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\BouncyCastle.Cryptography.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\MailKit.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\MimeKit.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\System.Security.Cryptography.Pkcs.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\runtimes\win\lib\net7.0\System.Security.Cryptography.Pkcs.dll

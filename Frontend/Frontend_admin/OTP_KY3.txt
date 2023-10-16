@@ -1,0 +1,334 @@
+SỬA DB:
+mã otp | timeOTP trong table user
+
+dự án cũ là tạo một otp mới
+tao một table otp mới
+
+CREATE TABLE otp ( 
+id INT PRIMARY KEY AUTO_INCREMENT, 
+emai VARCHAR(255), 
+otp VARCHAR(255), 
+time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+INDEX(time) 
+);
+
+project node
+mình check -> số lần đc giới hạn truy cập trong một ngày bằng cách
+set 1 biến (số lần truy cập) ở redis có giá trị 60s (tên key là IP của người dùng - value là số lần đã gọi otp)
+-> và fix cứng 1 biến số lần truy cập 
+so sánh số lần truy cập trên redis vs số lần truy cập fix cứng cho ra kết quả
+
+{
+   IP_CLIENT: SỐ_LẦN_ĐÃ_ĐC_GỬI_OTP  (TIME_EXPIRE(60s) )
+}
+
+// MÌNH ĐÃ CHẶN IP của người dùng spam otp
+
+
+Dự án của ta tạo một trường trong DB lưu số lần đc phép truy cập của user:
+
+
+limit_otp int NOT NULL DEFAULT = 1;
+limit_otp_time DATETIME NOT NULL;
+
+_ khi người dùng 
+
+ User.ResetTokenExpires < DateTime.Now // hết hạn
+
+
+
+
+OTP 
+-> sẽ là 1 ngày sẽ được gửi 5 lần otp ( tránh client spam otp quá nhiều trong 1 ngày)
+-> 1 phút sẽ được gửi otp 1 lần (tránh client spam OTP liên tục)
+
+CREATE TABLE otp (
+id INT PRIMARY KEY IDENTITY(1, 1),
+IP_client VARCHAR(255),
+email VARCHAR(255) NOT NULL,
+otp_hash byte(64), -- mã hoá sẽ thành byte
+otp_hash_salt byte(150),
+otp_spam_number INT NOT NULL,  -- sô lần client đã gửi spam otp trong 1 ngày
+otp_spam DATETIME NOT NULL,
+limit_Time_to_send_otp DATETIME NOT NULL,
+)
+
+User.otp_spam = DateTime.Now.AddDays(1);
+User.limit_Time_to_send_otp = DateTime.Now.AddMinutes(1),
+
+
+
+
+Lấy ip của client trong c#:
+var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+if (string.IsNullOrEmpty(ipAddress))
+{
+    ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+
+var otp = DateTime.Now.AddMinutes(1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bài toán:
+OTP 
+-> sẽ là 1 ngày sẽ được gửi 5 lần otp ( tránh client spam otp quá nhiều trong 1 ngày)
+-> 1 phút sẽ chỉ được gửi otp 1 lần (tránh client spam OTP liên tục)
+-> chặn ip của người dùng truy cập OTP
+-> hash otp trong db
+
+CREATE TABLE otp (
+id INT PRIMARY KEY IDENTITY(1, 1),
+IP_client VARCHAR(255),
+email VARCHAR(255) NOT NULL,
+otphash byte(64), -- mã hoá sẽ thành byte
+otphash_salt byte(150),
+otp_spam_number INT NOT NULL,  -- sô lần client đã gửi spam otp trong 1 ngày
+otp_spam DATETIME NOT NULL,
+limit_Time_to_send_otp DATETIME NOT NULL,
+)
+
+ALERT TABLE users ADD COLUMN isVerified BIT NOT NULL;
+
+BẮT ĐẦU LÀM THỬ CODE:
+   [HttpPost("register")]
+   public async Task<IActionResult> Register(UserRegisterRequest request)
+   {
+
+       try
+       {
+           if ( _context.Users.Any(u => u.Email == request.Email) )
+               {
+                   return BadRequest("user already exist ");
+               }
+	//HANDLE OTP:
+        
+//b1: lấy ip client:
+var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+if (string.IsNullOrEmpty(ipAddress))
+{
+    ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+//b2: CREATE OTP:
+string otp_c = create_otp();
+
+// b3: hash otp
+CreateOtpHash(otp_c, out byte[] otp_hash, out byte[] otp_hash_salt);
+
+// b4: save otp in DB:
+   var new_otp = new Entities.otp{
+	IP_client = ipAddress,
+	email = request.Email,
+	otphash = otp_hash,
+	otphash_salt = otp_hash_salt
+	otp_spam_number = 1,
+	otp_spam = DateTime.Now.AddDays(1), // có hạn là một ngày (1day/5otp)
+	limit_Time_to_send_otp = DateTime.Now.AddMinutes(2),
+    }
+
+   CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+  var user_n = new Entities.User
+            {
+                Fullname = request.FullName,
+                Email = request.Email,
+                Role = "USER",
+                PasswordSalt = passwordSalt,  //Encoding.UTF8.GetBytes("fghjktyuifvn");
+                PasswordHash = passwordHash,
+		isVerified = 0
+            };
+
+             _context.Users.Add(user_n);
+             await _context.SaveChangesAsync();
+
+	_emailService.SendEmail(randomNumberString, request.Email);
+
+	return Ok('OTP SENT EMAIL PLEASE CHECK EMAIL ENABLE ACCOUNT');
+
+
+            return Ok("create user success");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest( ex.Message );
+
+            }
+        }
+
+[HttpPost("verify_otp")]
+public async Task<IActionResult> verify_otp(string otp){
+	// lấy ip -> check trong bảng otp lấy ra dữ liệu:
+	
+var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+if (string.IsNullOrEmpty(ipAddress))
+{
+    ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+// isAddress = "::1" <=> 127.0.0.1 
+
+
+var new_otp = _context.Otp.Where( o => o.IP_client == ipAddress);
+
+if(new_otp == null){ return BadRequest("làm ơn đăng ký tài khoản") }
+	
+// xác thực otp -> enable account:
+if(!VerifyOtpHash(otp, new_otp.otp_hash, new_otp.otp_hash_salt )){
+	return BadRequest("OTP isn't correct");
+}
+
+// check thời gian hết hạn xem quá 1 phút chưa xem nó hết hạn chưa
+if(new_otp.limit_Time_to_send_otp < DateTime.Now){
+	return BadRequest("otp expire");
+}
+
+var user = _context.User.Where(u => u.Email == new_otp.Email)
+    
+// xoá hết các dữ liệu ở bảng otp của user này:
+_context.Otp.Delete( o => o.Email == new_otp.Email);
+
+// enable account:
+user.isVerified = 1;
+_context.saveChanges();
+
+return Ok("Account created success");
+
+}
+
+
+
+
+
+
+
+// làm thế nào để reset lại trường "otp_spam_number" sau 24h
+// 1 thiết lập trên DB 
+
+
+[HttpPost("send_again_otp")]
+public async Task<IActionResult> send_again_otp(string? email){
+int limit = 5;
+// có thể tìm trường otp theo email chuyền vào vs method post or lấy theo ip     
+var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+if (string.IsNullOrEmpty(ipAddress))
+{
+    ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+}
+
+var otp_old = _context.Otp.Where( o => o.IP_client == ipAddress );
+
+
+// check số lần truy cập ( vượt quá số lần truy cập chưa )
+if( ipAddress.otp_spam_number > limit ){
+
+	if(ipAddress.otp_spam < Datetime.Now){ // time hiện tại đã hơn otp_spam time
+		otp_old.otp_spam = DateTime.Now.AddDays(1);
+		otp_old.otp_spam_number = 1; 
+		string otp_c = create_otp();
+		CreateOtpHash(otp_c, out byte[] otp_hash, out byte[] otp_hash_salt);
+		otp_old.otphash = otp_hash;
+		otp_old.otphash_salt = otp_hash_salt;
+		otp_old.limit_Time_to_send_otp = DateTime.Now.AddMinutes(2);
+		_context.Otp.saveChanges();
+		return Ok("sent email success");
+	}else{
+		return BadRequest("số lần bạn request đã vượt quá trong ngày làm ơn đợi 24 tiếng sau");
+	}	
+}
+
+
+    // check xem đã qua 2 phút chưa (2' mới gửi otp 1 lần)
+	if( otp_old.limit_Time_to_send_otp > Datetime.Now ){ // thời gian còn lại vẫn còn hiệu lực
+		return BadRequest("làm ơn thao tác chậm lại 2' bạn có thể request otp 1 lần")
+	}
+
+    
+	// tạo otp mới và update lại otp_old + tăng số lần truy cập + 
+	// tạo mới thời gian cho otp ( có hiệu lực trong vòng 2' ) :
+string otp_c = create_otp();
+CreateOtpHash(otp_c, out byte[] otp_hash, out byte[] otp_hash_salt);
+
+	otp_old.otphash = otp_hash;
+	otp_old.otphash_salt = otp_hash_salt;
+	otp_old.otp_spam_number = otp_old.otp_spam_number + 1;
+	otp_old.limit_Time_to_send_otp = DateTime.Now.AddMinutes(2);
+	_context.Otp.saveChanges();
+	return Ok("sent email success");
+}
+
+
+
+      private void CreateOtpHash(string randomNumberString, out byte[] otp_hash, out byte[] otp_hash_salt)
+      {
+          using ( var hmac = new HMACSHA512() )
+          {
+              otp_hash_salt = hmac.Key;
+              otp_hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(randomNumberString));
+          }
+      }
+
+
+      private bool VerifyOtpHash(string otp, byte[] otp_hash, byte[] otp_hash_salt)
+      {
+          using (var hmac = new HMACSHA512(otp_hash_salt))
+          {
+              var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(otp));
+              return computedHash.SequenceEqual(otp_hash);
+          }
+      }
+
+
+	private string create_otp(){
+		Random random = new Random();
+		int number = random.Next(10000, 100000); // 5 số 
+		string randomNumberString = number.toString();
+		return randomNumberString;
+         }
+
+// vậy thì khi verify otp thành công thì ta mới tạo tài khoản 
+
+
+Đúng, việc thêm một trường status vào bảng user là một cách tốt để theo dõi trạng 
+thái xác minh OTP của người dùng. Bạn có thể đặt giá trị mặc định cho trường này 
+là false và sau khi người dùng xác minh OTP thành công, bạn cập nhật giá trị này
+ thành true.
+=> ta sẽ tạo một trường là isVerified boolean trong bảng USER 
+-> và sẽ check trong login nếu tài khoản này mà có trường isVerified == false 
+thì return 400 user not found
+
+
+
+
+
+Trong lần đầu tiên thì set dữ liệu trong bảng OTP mặc định:
+nếu send lại otp lần thứ 2 thì sẽ ra một đường router riêng 
+-> sẽ tìm theo ip và update lại trường otp và dữ liệu trong các field vẫn giữ nguyên:
+
+
+
+
+HỌC SÁNG NAY 
+
+test chức năng đăng nhập register lần cuối! -> đẩy lên git 
+_ thêm chức năng otp cho dự án!
+_ test chức năng otp -> đẩy lên git 
+
+
+
+
+ 
+
