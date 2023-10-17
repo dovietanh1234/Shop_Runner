@@ -22,21 +22,38 @@ namespace SHOP_RUNNER.Services.ProductRepo
             _context = context;
         }
 
+
+        /*
+         
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Uploads\Images");
+        if (!Directory.Exists(filePath))
+        {
+             Directory.CreateDirectory(filePath);
+        }
+         
+         */
+
         // Xong add
         public ProductGetAll AddProduct(CreateProduct product )
         {
             #region HANDLE THUMBNAIL
             // handle file:
-            string path = "Uploads/Images";
+            string path = "wwwroot\\Uploads\\Images";
             string filename = Guid.NewGuid().ToString() + Path.GetExtension( product.Thumbnail.FileName );
-            var upload = Path.Combine(  Directory.GetCurrentDirectory(), path, filename );
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), path);
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            // var upload = Path.Combine(  Directory.GetCurrentDirectory(), path, filename );
+            var upload = Path.Combine(filePath, filename);
 
             product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
 
             // using ( var fileStream = new FileStream(upload, FileMode.Create))
             //{ product.thumbnail.CopyTo(fileStream); }
-            
-
 
             string url = $"/Uploads/Images/{filename}";
             #endregion
@@ -277,13 +294,26 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             #region HANDLE THUMBNAIL
             // handle file:
-            string path = "Uploads/Images";
+            /* string path = "Uploads/Images";
             string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
             var upload = Path.Combine(Directory.GetCurrentDirectory(), path, filename);
+            product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
+            string url = $"/Uploads/Images/{filename}";*/
+
+
+            // handle file:
+            string path = "wwwroot\\Uploads\\Images";
+            string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), path);
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+            var upload = Path.Combine(filePath, filename);
 
             product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
-
             string url = $"/Uploads/Images/{filename}";
+
             #endregion
 
 

@@ -94,11 +94,12 @@ if (app.Environment.IsDevelopment())
 }
 
 // cấu hình cho phép sử dụng file tĩnh ở thư mục updates/images:
-app.UseStaticFiles( new StaticFileOptions
+/*app.UseStaticFiles( new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider( 
                         Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Images")), RequestPath = "/Images"
-});
+});*/
+
 
 // sử dụng gọi lại cấu hình của core ra đây:
 app.UseCors();

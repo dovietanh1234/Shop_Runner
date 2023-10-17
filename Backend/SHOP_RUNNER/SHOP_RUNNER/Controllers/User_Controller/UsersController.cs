@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace SHOP_RUNNER.Controllers.User
 {
@@ -37,22 +38,49 @@ namespace SHOP_RUNNER.Controllers.User
 
             try
             {
-                if ( _context.Users.Any(u => u.Email == request.Email) )
+                 
+
+                if ( _context.Users.Any(u => u.Email == request.Email  ) )
                     {
-                        return BadRequest("user already exist ");
+                        return BadRequest("user already exist");
                     }
 
 
-                //hanlde otp send otp throught EMAIL for user:
+                // PHAN 1: hanlde otp send otp throught EMAIL for user:
+                //B1 lay ip client:
+                var isAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                if ( string.IsNullOrEmpty(isAddress) )
+                {
+                    isAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                }
+
+                //B2: Create otp 
+                string otp = create_otp();
+
+                //B5 bổ sung -> gửi email cho client:
+                _emailService.sentOtp(request.Email, otp);
+
+                //B3 hash otp 
+                CreateOtpHash(otp, out byte[] otp_hash, out byte[] otp_hash_salt);
+
+                //B4 save otp_hash, otp_hash_salt in DB:
+                var new_otp = new Otp
+                {
+                    IpClient = isAddress,
+                    Email = request.Email,
+                    Otphash = otp_hash,
+                    OtphashSalt = otp_hash_salt,
+                    OtpSpamNumber = 1,
+                    OtpSpam = DateTime.Now.AddDays(1), // 1 ngay se chi duoc gui 5 cai otp 
+                    LimitTimeToSendOtp = DateTime.Now.AddMinutes(2) // 2 phut se het han otp
+                };
 
 
+                //PHAN 2: create hashPassword throught user's password:
+                // "out" is mean: we will take the values likes THAM CHIẾU ( khi một biến thay đổi thì giá trị ở chỗ khác cx bị thay đổi => tham chiếu "out" )
 
- // create hashPassword throught user's password:
- // "out" is mean: we will take the values likes THAM CHIẾU ( khi một biến thay đổi thì giá trị ở chỗ khác cx bị thay đổi => tham chiếu "out" )
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
-
-
+                
+                CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
             var user_n = new Entities.User
             {
                 Fullname = request.FullName,
@@ -61,12 +89,13 @@ namespace SHOP_RUNNER.Controllers.User
                 PasswordSalt = passwordSalt,  //Encoding.UTF8.GetBytes("fghjktyuifvn");
                 PasswordHash = passwordHash
             };
-
-             _context.Users.Add(user_n);
+                _context.Users.Add(user_n);
+                _context.Otps.Add(new_otp);
+             
              await _context.SaveChangesAsync();
 
             // return Ok(new { message = passwordHash, message1 = passwordSalt });
-            return Ok("create user success");
+            return Ok("Please check otp in your email");
             }
             catch (Exception ex)
             {
@@ -75,8 +104,135 @@ namespace SHOP_RUNNER.Controllers.User
             }
         }
 
+        // verify otp để enable account:
+        [HttpPost("verifyOtp")]
+        public async Task<IActionResult> verify_otp(string otp, string email)
+        {
+            // B1 lấy ip của client 
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            }
 
+            // B2 xác nhận IP có tồn tại ko?
+            var new_otp_1 = _context.Otps.Where(o => (o.IpClient == ipAddress && o.Email == email ) )
+                                        .OrderByDescending(o => o.Id)
+                                        .FirstOrDefault();
 
+            if (new_otp_1 == null)
+            {
+                return BadRequest("please register account");
+            }
+
+            //B3 xác thực otp xem có đúng không?
+            if (!VerifyOtpHash( otp, new_otp_1.Otphash, new_otp_1.OtphashSalt))
+            {
+                return BadRequest("sorry your otp is incorrect");
+            }
+
+            //B4 check thời gian otp hết hạn chưa (2'):
+            if (new_otp_1.LimitTimeToSendOtp < DateTime.Now)
+            {
+                return BadRequest("otp exipre");
+            }
+
+            //B5 enable account
+            var user = _context.Users.FirstOrDefault(u => u.Email == new_otp_1.Email);
+            if (user != null)
+            {
+                user.IsVerified = true;
+                await _context.SaveChangesAsync();
+            }
+
+            //B6 xoá hết các trường otp theo email trong bảng otp:
+            var OtpDelete = _context.Otps.Where(O => O.Email == new_otp_1.Email);
+            _context.Otps.RemoveRange(OtpDelete);
+            _context.SaveChanges();
+
+            return Ok("your account is enable");
+        }
+
+        /*
+         những dòng gạch xanh warning là vì ta chưa check xem nó có null hay ko?
+         */
+
+        [HttpPost("send_again_otp")]
+        public async Task<IActionResult> sent_againt_otp(string email)
+        {
+            // B1 tạo một biến chứa số lượng limit request otp/day
+            int limit = 5;
+
+             byte[] otp_hash;
+             byte[] otp_hash_salt;
+
+            //B2 lấy ip address
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            }
+
+            //B3 lấy ra cái otp cũ mới nhất đc lưu trong DB:
+            var old_otp = _context.Otps.Where(o => (o.IpClient == ipAddress && o.Email == email ))
+                .OrderByDescending(o => o.Id)
+                .FirstOrDefault();
+
+            if (old_otp == null)
+            {
+                return BadRequest("please register account");
+            }
+
+            // B4 Check số lần truy cập lấy mã otp trong 1 ngày đã vượt quá 5 lần chưa?
+            if (old_otp.OtpSpamNumber > limit )
+            {
+                // check: nếu đã qua một ngày cho phép gửi 5 lần otp nữa 
+                if (old_otp.OtpSpam < DateTime.Now)
+                {
+                    old_otp.OtpSpam = DateTime.Now.AddDays(1);
+                    old_otp.OtpSpamNumber = 1;
+                    // Tạo otp mới và gửi luôn cho client trong email:
+                    string otp_newest = create_otp();
+                    _emailService.sentOtp( old_otp.Email, otp_newest );
+                    // lưu lại otp mới trong bảng otp:
+                    CreateOtpHash(otp_newest, out otp_hash, out otp_hash_salt);
+                    old_otp.Otphash = otp_hash;
+                    old_otp.OtphashSalt = otp_hash_salt;
+                    old_otp.LimitTimeToSendOtp = DateTime.Now.AddMinutes(2);
+                    await _context.SaveChangesAsync();
+                    return Ok("Otp sent again your email");
+                }
+                else
+                {
+                    // check: nếu chưa qua một ngày -> đang spam email
+                    return BadRequest("the number you sent otp is limit please wait to 24 hour next");
+                }
+            }
+
+            // B5: vì cách 2' ta ms đc gửi otp 1 lần -> check xem đã qua 2' chưa:
+            if ( old_otp.LimitTimeToSendOtp > DateTime.Now )
+            {
+                return BadRequest("Please slow operation, you need wait 1 minutes to sent email ");
+            }
+
+            //B6 Cho gửi Otp - tạo otp có hiệu lực trong vòng 2':
+            string otp_crea = create_otp();
+            _emailService.sentOtp(old_otp.Email, otp_crea);
+            CreateOtpHash( otp_crea, out otp_hash, out otp_hash_salt);
+            old_otp.Otphash = otp_hash;
+            old_otp.OtphashSalt = otp_hash_salt;
+            old_otp.OtpSpamNumber = old_otp.OtpSpamNumber + 1;
+            old_otp.LimitTimeToSendOtp = DateTime.Now.AddMinutes(2);
+            _context.SaveChanges();
+            return Ok("Otp sent again your email");
+        }
+        /*
+         2 biến out byte[], out byte[] được khai báo trong hai khối if khác nhau, 
+        nhưng chúng vẫn nằm trong cùng một phạm vi hàm, 
+        nên bạn không thể khai báo lại chúng!
+        -> ta sẽ chỉ có thể khai báo ở đầu hàm: byte[] variable
+        và sử dụng out variable khi cần ...
+         */
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(UserLoginRequest request)
@@ -89,6 +245,11 @@ namespace SHOP_RUNNER.Controllers.User
                 if (User_new == null)
                 {
                     return BadRequest("user not found");
+                }
+
+                if (User_new.IsVerified == false)
+                {
+                    return BadRequest("your account is not enable please register account and enable");
                 }
 
                 if (!VerifyPasswordHash(request.Password, User_new.PasswordHash, User_new.PasswordSalt)) // this method return false -> change true and run condition
@@ -311,34 +472,37 @@ namespace SHOP_RUNNER.Controllers.User
             }
         }
 
-      //  [HttpPost("send-mail")]
-      //  public IActionResult testMail(EmailModel request)
-      //  {
-        //    try
-          //  {
+      
+        /*  [HttpPost("send-mail")]
+        public IActionResult testMail(EmailModel request)
+        {
+            try
+            {
                 // lấy IP của người dùng:
-           //      var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-           //     if (string.IsNullOrEmpty(ipAddress))
-            //     {
-                   //  ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-               //   }
+                var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                if (string.IsNullOrEmpty(ipAddress))
+                 {
+                     ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                  }
 
-                /*
-                  “::1”, tương đương với 127.0.0.1 trong IPv4.
-                    Nếu bạn muốn kiểm tra xem API có thể lấy được địa chỉ IP thực sự của client qua internet hay không sd postman
-                 */
+                
+                 // “::1”, tương đương với 127.0.0.1 trong IPv4.
+                 //   Nếu bạn muốn kiểm tra xem API có thể lấy được địa chỉ IP thực sự của client qua internet hay không sd postman
+                 
 
                 // send email:
-                // _emailService.SendEmail(request);
+                 _emailService.SendEmail(request);
 
-          //      return Ok(ipAddress);
+               return Ok("sent email success");
 
-       //     }catch(Exception ex)
-       //     {
-              //  return BadRequest(ex.Message);
-       //     }
+           }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
            
-       // }
+        }*/
+
+
 
 // CÁC FUNCTION VIẾT Ở ĐÂY:
 
@@ -375,10 +539,6 @@ namespace SHOP_RUNNER.Controllers.User
             // sau buoc nay cac request sau se -> lay refreshToken trong cookie vao check!
 
         }
-
-
-
-
 
 
         private string CreateToken(Entities.User user)
@@ -451,6 +611,49 @@ namespace SHOP_RUNNER.Controllers.User
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
+
+        private string create_otp()
+        {
+            Random random = new Random();
+            int number = random.Next(10000, 100000);
+            string randomString = number.ToString();
+            return randomString;
+        }
+
+       private void CreateOtpHash(string otp, out byte[] otp_hash, out byte[] otp_hash_salt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                otp_hash_salt = hmac.Key;
+                otp_hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(otp));
+            }
+        }
+
+
+        private bool VerifyOtpHash(string otp,  byte[] Otphash, byte[] OtphashSalt)
+        {
+            using (var hmac = new HMACSHA512(OtphashSalt))
+            {
+                var computedHash = hmac.ComputeHash( Encoding.UTF8.GetBytes(otp) );
+                return computedHash.SequenceEqual(Otphash);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }

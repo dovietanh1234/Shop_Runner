@@ -29,6 +29,8 @@ public partial class RunningShopContext : DbContext
 
     public virtual DbSet<OrderProductsDetail> OrderProductsDetails { get; set; }
 
+    public virtual DbSet<Otp> Otps { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Size> Sizes { get; set; }
@@ -37,13 +39,13 @@ public partial class RunningShopContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-DKL7C0F\\SQLEXPRESS;Database=Running_shop;Trusted_Connection=True;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=tcp:semester3.database.windows.net,1433;Database=Running_shop;User ID=Running_shop;Password=Dovietanh2k@;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Brand>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__brand__3213E83F373E4C22");
+            entity.HasKey(e => e.Id).HasName("PK__brand__3213E83F43F63294");
 
             entity.ToTable("brand");
 
@@ -77,11 +79,11 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__categori__3213E83F829CDC54");
+            entity.HasKey(e => e.Id).HasName("PK__categori__3213E83FE91A68D5");
 
             entity.ToTable("categories");
 
-            entity.HasIndex(e => e.Name, "UQ__categori__72E12F1B52937DC7").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__categori__72E12F1BBD7ABBFF").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
@@ -92,7 +94,7 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Color>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__colors__3213E83F0A6FE04E");
+            entity.HasKey(e => e.Id).HasName("PK__colors__3213E83FF1BEC43D");
 
             entity.ToTable("colors");
 
@@ -105,7 +107,7 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Gender>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__genders__3213E83F21A23AEC");
+            entity.HasKey(e => e.Id).HasName("PK__genders__3213E83F35F1489C");
 
             entity.ToTable("genders");
 
@@ -118,11 +120,11 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__orders__3213E83FB0179D9E");
+            entity.HasKey(e => e.Id).HasName("PK__orders__3213E83F40DE282B");
 
             entity.ToTable("orders");
 
-            entity.HasIndex(e => e.InvoiceId, "UQ__orders__F58DFD4899AC5C1D").IsUnique();
+            entity.HasIndex(e => e.InvoiceId, "UQ__orders__F58DFD4816A4187F").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.City)
@@ -179,11 +181,41 @@ public partial class RunningShopContext : DbContext
             entity.HasOne(d => d.Order).WithMany()
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__order_pro__order__628FA481");
+                .HasConstraintName("FK__order_pro__order__778AC167");
 
             entity.HasOne(d => d.Product).WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK__order_pro__produ__619B8048");
+        });
+
+        modelBuilder.Entity<Otp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__otp__3213E83F7CA8492A");
+
+            entity.ToTable("otp");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("email");
+            entity.Property(e => e.IpClient)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("IP_client");
+            entity.Property(e => e.LimitTimeToSendOtp)
+                .HasColumnType("datetime")
+                .HasColumnName("limit_Time_to_send_otp");
+            entity.Property(e => e.OtpSpam)
+                .HasColumnType("datetime")
+                .HasColumnName("otp_spam");
+            entity.Property(e => e.OtpSpamNumber).HasColumnName("otp_spam_number");
+            entity.Property(e => e.Otphash)
+                .HasMaxLength(64)
+                .HasColumnName("otphash");
+            entity.Property(e => e.OtphashSalt)
+                .HasMaxLength(150)
+                .HasColumnName("otphash_salt");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -251,7 +283,7 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Size>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__size__3213E83F1A3161D3");
+            entity.HasKey(e => e.Id).HasName("PK__size__3213E83F2336B09D");
 
             entity.ToTable("size");
 
@@ -291,6 +323,7 @@ public partial class RunningShopContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("fullname");
+            entity.Property(e => e.IsVerified).HasColumnName("isVerified");
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(64)
                 .IsFixedLength()

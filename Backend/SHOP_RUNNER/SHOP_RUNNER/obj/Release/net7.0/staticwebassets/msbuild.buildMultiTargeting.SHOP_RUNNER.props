@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\SHOP_RUNNER.props" />
+</Project>

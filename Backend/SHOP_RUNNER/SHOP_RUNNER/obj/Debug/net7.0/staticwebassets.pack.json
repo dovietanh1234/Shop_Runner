@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\33b4af4a-9cf6-47e3-be49-4fbd229b2b57.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\33b4af4a-9cf6-47e3-be49-4fbd229b2b57.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\6d020970-f0d6-4863-967c-8f25371cd884.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\6d020970-f0d6-4863-967c-8f25371cd884.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\b5d67f25-b1ad-4a20-b3d6-339636874d6e.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\b5d67f25-b1ad-4a20-b3d6-339636874d6e.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\b833cadd-a31a-4bb3-bc45-3ef0a3d28a5d.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\b833cadd-a31a-4bb3-bc45-3ef0a3d28a5d.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\fe00efe8-19f6-4801-9adf-e0a822e1e0b1.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\fe00efe8-19f6-4801-9adf-e0a822e1e0b1.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.SHOP_RUNNER.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.build.SHOP_RUNNER.props",
+      "PackagePath": "build\\SHOP_RUNNER.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildMultiTargeting.SHOP_RUNNER.props",
+      "PackagePath": "buildMultiTargeting\\SHOP_RUNNER.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildTransitive.SHOP_RUNNER.props",
+      "PackagePath": "buildTransitive\\SHOP_RUNNER.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
