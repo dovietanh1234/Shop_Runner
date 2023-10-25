@@ -9,9 +9,9 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         ProductDetail GetDetail(int id);
 
-        ProductGetAll AddProduct( CreateProduct product);
+        ProductGetAll AddProduct( CreateProduct product, string url);
 
-        void UpdateProduct(EditProduct product);
+        void UpdateProduct(EditProduct product, string url);
 
         void DeleteProduct(int id);
 

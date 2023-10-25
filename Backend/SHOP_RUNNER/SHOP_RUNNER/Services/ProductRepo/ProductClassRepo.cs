@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using SHOP_RUNNER.Common;
 using SHOP_RUNNER.DTOs.Brand_DTO;
 using SHOP_RUNNER.DTOs.Category_DTO;
@@ -34,11 +35,10 @@ namespace SHOP_RUNNER.Services.ProductRepo
          */
 
         // Xong add
-        public ProductGetAll AddProduct(CreateProduct product )
+        public ProductGetAll AddProduct(CreateProduct product, string url )
         {
             #region HANDLE THUMBNAIL
-            // handle file:
-            string path = "wwwroot\\Uploads\\Images";
+            /*             string path = "wwwroot\\Uploads\\Images";
             string filename = Guid.NewGuid().ToString() + Path.GetExtension( product.Thumbnail.FileName );
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), path);
@@ -55,8 +55,10 @@ namespace SHOP_RUNNER.Services.ProductRepo
             // using ( var fileStream = new FileStream(upload, FileMode.Create))
             //{ product.thumbnail.CopyTo(fileStream); }
 
-            string url = $"/Uploads/Images/{filename}";
+            string url = $"{Request.Scheme}://{Request.Host}/uploads/{filename}";*/
             #endregion
+
+
 
 
             Product new_Product = new Product()
@@ -287,18 +289,15 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
 
        
-        public void UpdateProduct(EditProduct product)
+        public void UpdateProduct(EditProduct product, string url)
         {
             var product_new = _context.Products.FirstOrDefault(p => p.Id == product.Id);
 
 
-            #region HANDLE THUMBNAIL
-            // handle file:
-            /* string path = "Uploads/Images";
-            string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
-            var upload = Path.Combine(Directory.GetCurrentDirectory(), path, filename);
-            product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
-            string url = $"/Uploads/Images/{filename}";*/
+         
+
+            /*  
+            
 
 
             // handle file:
@@ -314,7 +313,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
             product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
             string url = $"/Uploads/Images/{filename}";
 
-            #endregion
+            */
 
 
 

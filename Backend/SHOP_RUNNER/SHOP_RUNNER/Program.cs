@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using SHOP_RUNNER.Services.EmailService;
+using SHOP_RUNNER.Services.Cart_service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ builder.Services.AddControllers().AddNewtonsoftJson( options => options.Serializ
 // Khái báo interface Repository:
 builder.Services.AddScoped<IProductRepo, ProductClassRepo>();
 builder.Services.AddScoped<IEmailService, ClassEmailRepo>();
+builder.Services.AddScoped<ICart_m, Cart_m_class>();
 
 // triển khai Authorization 403 or 401 :
 
@@ -94,11 +96,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // cấu hình cho phép sử dụng file tĩnh ở thư mục updates/images:
-/*app.UseStaticFiles( new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider( 
-                        Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Images")), RequestPath = "/Images"
-});*/
+app.UseStaticFiles();
 
 
 // sử dụng gọi lại cấu hình của core ra đây:
@@ -108,6 +106,7 @@ app.UseHttpsRedirection();
 
 // sau khi triển khai cấu hình authen ở trên gọi lại middleware ở đây cho nó làm việc
 app.UseAuthentication();
+
 
 app.UseAuthorization();
 

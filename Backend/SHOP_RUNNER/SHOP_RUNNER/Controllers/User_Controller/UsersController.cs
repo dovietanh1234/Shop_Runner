@@ -109,14 +109,17 @@ namespace SHOP_RUNNER.Controllers.User
         public async Task<IActionResult> verify_otp(string otp, string email)
         {
             // B1 lấy ip của client 
-            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+           
+            /*
+              var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
             if (string.IsNullOrEmpty(ipAddress))
             {
                 ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             }
+             */
 
             // B2 xác nhận IP có tồn tại ko?
-            var new_otp_1 = _context.Otps.Where(o => (o.IpClient == ipAddress && o.Email == email ) )
+            var new_otp_1 = _context.Otps.Where(o =>  o.Email == email  )
                                         .OrderByDescending(o => o.Id)
                                         .FirstOrDefault();
 
@@ -167,20 +170,29 @@ namespace SHOP_RUNNER.Controllers.User
              byte[] otp_hash_salt;
 
             //B2 lấy ip address
-            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            
+            /*
+             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
             if (string.IsNullOrEmpty(ipAddress))
             {
                 ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             }
+             */
 
             //B3 lấy ra cái otp cũ mới nhất đc lưu trong DB:
-            var old_otp = _context.Otps.Where(o => (o.IpClient == ipAddress && o.Email == email ))
+            var old_otp = _context.Otps.Where(o =>  o.Email == email )
                 .OrderByDescending(o => o.Id)
                 .FirstOrDefault();
 
-            if (old_otp == null)
+            var user1 = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user1 == null && old_otp == null)
             {
-                return BadRequest("please register account");
+                return BadRequest("your account is not exist, please register account");
+            }
+
+            if ( user1.IsVerified == true )
+            {
+                return BadRequest("your account was enable");
             }
 
             // B4 Check số lần truy cập lấy mã otp trong 1 ngày đã vượt quá 5 lần chưa?

@@ -58,21 +58,22 @@ public partial class RunningShopContext : DbContext
 
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("carts");
+            entity.HasKey(e => e.Id).HasName("PK__carts__3213E83F59003EFD");
 
+            entity.ToTable("carts");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BuyQty)
                 .HasDefaultValueSql("((1))")
                 .HasColumnName("buy_qty");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.Carts)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK__carts__product_i__5812160E");
 
-            entity.HasOne(d => d.User).WithMany()
+            entity.HasOne(d => d.User).WithMany(p => p.Carts)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__carts__user_id__571DF1D5");
         });

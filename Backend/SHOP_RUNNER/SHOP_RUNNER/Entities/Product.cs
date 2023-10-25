@@ -33,6 +33,8 @@ public partial class Product
 
     public virtual Brand Brand { get; set; } = null!;
 
+    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual Color Color { get; set; } = null!;

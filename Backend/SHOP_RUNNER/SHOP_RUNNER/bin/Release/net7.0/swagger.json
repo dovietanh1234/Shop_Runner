@@ -65,12 +65,6 @@
           },
           {
             "in": "formData",
-            "name": "createDate",
-            "type": "string",
-            "format": "date-time"
-          },
-          {
-            "in": "formData",
             "name": "user_id",
             "type": "integer",
             "format": "int32"
@@ -128,42 +122,8 @@
         }
       }
     },
-    "/api/Product/{id}": {
+    "/api/Product/update": {
       "put": {
-        "tags": [
-          "Product"
-        ],
-        "consumes": [
-          "application/json-patch+json",
-          "application/json",
-          "text/json",
-          "application/*+json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "schema": {
-              "$ref": "#/definitions/EditProduct"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Product/upload-image": {
-      "post": {
         "tags": [
           "Product"
         ],
@@ -173,34 +133,72 @@
         "parameters": [
           {
             "in": "formData",
-            "name": "ContentType",
-            "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "ContentDisposition",
-            "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "Headers",
-            "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "Length",
+            "name": "Id",
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           {
             "in": "formData",
             "name": "Name",
+            "required": true,
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          },
+          {
+            "in": "formData",
+            "name": "price",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "description",
             "type": "string"
           },
           {
             "in": "formData",
-            "name": "FileName",
-            "type": "string"
+            "name": "Thumbnail",
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "qty",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "category_id",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "gender_id",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "brand_id",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "size_id",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "formData",
+            "name": "color_id",
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "responses": {
@@ -359,6 +357,27 @@
         }
       }
     },
+    "/api/Product/delete": {
+      "delete": {
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "type": "integer",
+            "format": "int32",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Users/register": {
       "post": {
         "tags": [
@@ -377,6 +396,52 @@
             "schema": {
               "$ref": "#/definitions/UserRegisterRequest"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Users/verifyOtp": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "otp",
+            "type": "string",
+            "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Users/send_again_otp": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
@@ -539,62 +604,6 @@
     }
   },
   "definitions": {
-    "EditProduct": {
-      "required": [
-        "category_id",
-        "name",
-        "price",
-        "qty"
-      ],
-      "type": "object",
-      "properties": {
-        "id": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "name": {
-          "maxLength": 255,
-          "minLength": 3,
-          "type": "string"
-        },
-        "price": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "description": {
-          "type": "string"
-        },
-        "thumbnail": {
-          "format": "binary",
-          "type": "string"
-        },
-        "qty": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "category_id": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "gender_id": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "brand_id": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "size_id": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "color_id": {
-          "format": "int32",
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false
-    },
     "ResetPasswordRequest": {
       "required": [
         "confirmPassword",

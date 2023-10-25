@@ -46,17 +46,38 @@ namespace SHOP_RUNNER.Controllers.Product
         }
 
         // SỬA
-        [HttpPut("{id}")]
-        public IActionResult updateP(int id, EditProduct product)
+        [HttpPut]
+        [Route("update")]
+        public IActionResult updateP([FromForm]EditProduct product)
         {
-            if (id != product.Id)
-            {
-                return Ok("something went wrong try again");
-            }
-
             try
             {
-                _IProductRepo.UpdateProduct(product);
+                #region HANDLE THUMBNAIL
+
+                string path = "wwwroot\\Uploads\\Images";
+                string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
+
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads/Images");
+                if (!Directory.Exists(filePath))
+                {
+                    Directory.CreateDirectory(filePath);
+                }
+
+                // var upload = Path.Combine(  Directory.GetCurrentDirectory(), path, filename );
+                var upload = Path.Combine(filePath, filename);
+
+                product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
+
+                // using ( var fileStream = new FileStream(upload, FileMode.Create))
+                //{ product.thumbnail.CopyTo(fileStream); }
+
+                string url = $"{Request.Scheme}://{Request.Host}/Uploads/Images/{filename}";
+
+                #endregion
+
+
+
+                _IProductRepo.UpdateProduct(product, url);
                 return Ok("Update success");
             }catch(Exception ex) {
                 return BadRequest(ex.Message);
@@ -69,7 +90,32 @@ namespace SHOP_RUNNER.Controllers.Product
         public IActionResult AddP([FromForm]CreateProduct product) {
             try
             {
-                return Ok(_IProductRepo.AddProduct(product));
+
+                #region HANDLE THUMBNAIL
+
+                string path = "wwwroot\\Uploads\\Images";
+                string filename = Guid.NewGuid().ToString() + Path.GetExtension(product.Thumbnail.FileName);
+
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads/Images");
+                if (!Directory.Exists(filePath))
+                {
+                    Directory.CreateDirectory(filePath);
+                }
+
+                // var upload = Path.Combine(  Directory.GetCurrentDirectory(), path, filename );
+                var upload = Path.Combine(filePath, filename);
+
+                product.Thumbnail.CopyTo(new FileStream(upload, FileMode.Create));
+
+                // using ( var fileStream = new FileStream(upload, FileMode.Create))
+                //{ product.thumbnail.CopyTo(fileStream); }
+
+                string url = $"{Request.Scheme}://{Request.Host}/Uploads/Images/{filename}";
+
+                #endregion
+
+
+                return Ok(_IProductRepo.AddProduct(product, url));
             }catch(Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -77,7 +123,8 @@ namespace SHOP_RUNNER.Controllers.Product
         }
 
 
-        [HttpPost]
+       
+        /* [HttpPost]
         [Route("upload-image")]
         public IActionResult UploadImage([FromForm]IFormFile image) {
             string path = "Uploads/Images";
@@ -88,7 +135,9 @@ namespace SHOP_RUNNER.Controllers.Product
 
             string url = $"/Uploads/Images/{filename}";
             return Ok(url);
-        }
+        }*/
+
+
 
         [HttpGet]
         [Route("Search")]
@@ -168,7 +217,19 @@ namespace SHOP_RUNNER.Controllers.Product
             }
         }
 
-
+        [HttpDelete]
+        [Route("delete")]
+        public IActionResult delete(int id)
+        {
+            try
+            {
+                _IProductRepo.DeleteProduct(id);
+                return Ok("delete success");
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
     }

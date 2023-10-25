@@ -22,8 +22,6 @@ namespace SHOP_RUNNER.Models.Product_Model
         [Required(ErrorMessage = "please enter type of category")]
         public int category_id { get; set; }
 
-        public DateTime createDate { get; set; }
-
         public int user_id { get; set; }
 
         public int gender_id { get; set; }
