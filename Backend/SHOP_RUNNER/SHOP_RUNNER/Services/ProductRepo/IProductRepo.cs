@@ -19,7 +19,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         List<ProductGetAll> Relateds(int id);
 
-        List<ProductGetAll> Paging(int page, int pagesize);
+        Object Paging(int page, int pagesize);
 
         List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color);
 

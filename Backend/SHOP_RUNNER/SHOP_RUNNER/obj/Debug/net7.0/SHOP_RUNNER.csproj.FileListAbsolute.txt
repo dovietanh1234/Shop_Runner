@@ -88,3 +88,5 @@ E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Debug\net7.0\SHOP_RUNNER.pdb
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Debug\net7.0\SHOP_RUNNER.genruntimeconfig.cache
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Debug\net7.0\ref\SHOP_RUNNER.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\SHOP_RUNNER.staticwebassets.runtime.json
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\PayPalCheckoutSdk.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\bin\Debug\net7.0\PayPalHttp-Dotnet.dll

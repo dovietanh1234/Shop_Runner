@@ -333,7 +333,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
             }
         }
 
-       public List<ProductGetAll> Paging(int page, int pagesize)
+       public Object Paging(int page, int pagesize)
         {
             var Products = _context.Products.AsQueryable().Include(p => p.Category);
 
@@ -361,7 +361,11 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             }
 
-            return New_List;
+            return new
+            {
+                New_List = New_List,
+                Count_P = Products.Count()
+            };
         }
 
 

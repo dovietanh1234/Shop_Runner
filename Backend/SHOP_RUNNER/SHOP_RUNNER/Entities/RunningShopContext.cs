@@ -21,19 +21,29 @@ public partial class RunningShopContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<CityShipping> CityShippings { get; set; }
+
     public virtual DbSet<Color> Colors { get; set; }
 
     public virtual DbSet<Gender> Genders { get; set; }
 
+    public virtual DbSet<Invoice> Invoices { get; set; }
+
+    public virtual DbSet<MethodPayment> MethodPayments { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<OrderProductsDetail> OrderProductsDetails { get; set; }
+    public virtual DbSet<OrderProduct> OrderProducts { get; set; }
 
     public virtual DbSet<Otp> Otps { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<Shipping> Shippings { get; set; }
+
     public virtual DbSet<Size> Sizes { get; set; }
+
+    public virtual DbSet<Status> Statuses { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -93,6 +103,21 @@ public partial class RunningShopContext : DbContext
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<CityShipping>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__City_shi__3213E83F9DCA904C");
+
+            entity.ToTable("City_shipping");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.PriceShipping)
+                .HasColumnType("decimal(19, 2)")
+                .HasColumnName("price_shipping");
+        });
+
         modelBuilder.Entity<Color>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__colors__3213E83FF1BEC43D");
@@ -119,6 +144,45 @@ public partial class RunningShopContext : DbContext
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.HasKey(e => e.InvoiceNo).HasName("PK__Invoice__D796B226DBB2C763");
+
+            entity.ToTable("Invoice");
+
+            entity.Property(e => e.InvoiceNo)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.City)
+                .HasMaxLength(250)
+                .HasColumnName("city");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.PaymentMethod)
+                .HasMaxLength(250)
+                .HasColumnName("payment_method");
+            entity.Property(e => e.Status)
+                .HasMaxLength(250)
+                .HasColumnName("status");
+            entity.Property(e => e.TotalMoney)
+                .HasColumnType("decimal(19, 2)")
+                .HasColumnName("total_money");
+        });
+
+        modelBuilder.Entity<MethodPayment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MethodPa__3213E83FCE2EEFE5");
+
+            entity.ToTable("MethodPayment");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__orders__3213E83F40DE282B");
@@ -128,48 +192,67 @@ public partial class RunningShopContext : DbContext
             entity.HasIndex(e => e.InvoiceId, "UQ__orders__F58DFD4816A4187F").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.City)
-                .HasMaxLength(100)
-                .IsUnicode(false)
-                .HasColumnName("city");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.GrandTotal)
                 .HasColumnType("decimal(14, 2)")
                 .HasColumnName("grand_total");
+            entity.Property(e => e.IdCityShip).HasColumnName("id_city_ship");
             entity.Property(e => e.InvoiceId)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("invoice_id");
-            entity.Property(e => e.PaymentMethod)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("payment_method");
+            entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method_id");
+            entity.Property(e => e.ShipingId).HasColumnName("shiping_id");
             entity.Property(e => e.ShippingAddress)
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("shipping_address");
-            entity.Property(e => e.Status)
+            entity.Property(e => e.StatusId)
                 .HasDefaultValueSql("((1))")
-                .HasColumnName("status");
+                .HasColumnName("status_id");
             entity.Property(e => e.Tel)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("tel");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.HasOne(d => d.IdCityShipNavigation).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.IdCityShip)
+                .HasConstraintName("FK_orders_city_shipping");
+
+            entity.HasOne(d => d.Invoice).WithOne(p => p.Order)
+                .HasForeignKey<Order>(d => d.InvoiceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_orders_invoice");
+
+            entity.HasOne(d => d.PaymentMethod).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.PaymentMethodId)
+                .HasConstraintName("FK_orders_payment_method");
+
+            entity.HasOne(d => d.Shiping).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ShipingId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__orders__shiping___2739D489");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.StatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_orders_status");
+
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__orders__user_id__5DCAEF64");
         });
 
-        modelBuilder.Entity<OrderProductsDetail>(entity =>
+        modelBuilder.Entity<OrderProduct>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("order_products_detail");
+            entity.HasKey(e => e.Id).HasName("PK__order_pr__3213E83F8809ECC8");
 
+            entity.ToTable("order_products");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BuyQty)
                 .HasDefaultValueSql("((1))")
                 .HasColumnName("buy_qty");
@@ -179,12 +262,12 @@ public partial class RunningShopContext : DbContext
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
 
-            entity.HasOne(d => d.Order).WithMany()
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderProducts)
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__order_pro__order__778AC167");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderProducts)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK__order_pro__produ__619B8048");
         });
@@ -282,6 +365,16 @@ public partial class RunningShopContext : DbContext
                 .HasConstraintName("FK__products__user_i__4F7CD00D");
         });
 
+        modelBuilder.Entity<Shipping>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3213E83FBF688D07");
+
+            entity.ToTable("Shipping");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
         modelBuilder.Entity<Size>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__size__3213E83F2336B09D");
@@ -292,6 +385,18 @@ public partial class RunningShopContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(10)
                 .IsUnicode(false)
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<Status>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Status__3213E83F8014469B");
+
+            entity.ToTable("Status");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
                 .HasColumnName("name");
         });
 

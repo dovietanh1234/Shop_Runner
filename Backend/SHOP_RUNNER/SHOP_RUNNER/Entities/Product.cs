@@ -41,6 +41,8 @@ public partial class Product
 
     public virtual Gender Gender { get; set; } = null!;
 
+    public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
+
     public virtual Size Size { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
