@@ -25,5 +25,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         List<ProductGetAll> Sort(string? sortBy);
 
+        void turn_off_p(int p_id);
+
     }
 }

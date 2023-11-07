@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MailKit.Search;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PayPalCheckoutSdk.Orders;
+using SHOP_RUNNER.DTOs.Order_DTO;
 using SHOP_RUNNER.Entities;
 using SHOP_RUNNER.Models.Order_model;
+using SHOP_RUNNER.Services.EmailService;
 using SHOP_RUNNER.Services.Order_service;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using Order = PayPalCheckoutSdk.Orders.Order;
 
 namespace SHOP_RUNNER.Controllers.Order_controller
@@ -18,14 +23,16 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         private readonly IConfiguration _configuration;
         private readonly SaboxPaypal_class _saboxPayPalClass;
         private readonly HttpResponse _response;
-        private HandleOrder _new_order;
+        private HandleOrder_2 _new_order;
+        private readonly IEmailService _emailService;
 
-        public OrderController(RunningShopContext context, IConfiguration configuration)
+        public OrderController(RunningShopContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _response = null;
             _saboxPayPalClass = new SaboxPaypal_class(_configuration);
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -57,34 +64,52 @@ namespace SHOP_RUNNER.Controllers.Order_controller
             //Lấy random string và chuyền vào HandleOrder:
             string invoice_id = await RandomString();
 
-                //CREATE ORDER
-                _new_order = new HandleOrder(_context, request.userId, request.ShipAddress, request.cityShipId, request.tel, request.paymentMethodId, total_P, invoice_id);
+
+
             // return invoice_id
             //  string id_invoice = await _new_order.Handle_payment();
 
 
 
-
-          /*  int result_order = await _new_order.Handle_payment();
-            if (result_order == 4000)
-            {
-                return BadRequest("fail");
-            }
-
-            */
-
-
-
-
             if (request.paymentMethodId == 1)
                 {
-                // thanh toán offline:
+
+                    _new_order = new HandleOrder_2(_context, request.userId, request.ShipAddress, request.cityShipId, request.tel, request.paymentMethodId, total_P, invoice_id);
+                    int result_order = await _new_order.Handle_payment();
+                    if (result_order == 4000)
+                    {
+                        return BadRequest("fail");
+                    }
+
+                    // thanh toán offline:
                     return Ok("Order success! please wait to staff calls for you to validate order... follow status order on website");
 
                 }
                 else
                 {
-                int value_price = total_P + (int)(total_P * 0.01) + (int)(city_ship.PriceShipping);
+                    // Lưu dữ liệu vào session
+                    HttpContext.Session.SetString("invoiceId", invoice_id);
+
+                    //CREATE ORDER
+                    //_new_order = new HandleOrder_2(_context, request.userId, request.ShipAddress, request.cityShipId, request.tel, request.paymentMethodId, total_P, invoice_id);
+
+                    // SAVE DATA IN DB -> HAM GET PAYPAL TẠO NẾU THANH TOÁN THÀNH CÔNG:
+                    var order_success = new HandleOrder()
+                    {
+                        InvoiceId = invoice_id,
+                        UserId = request.userId,
+                        ShipAddress = request.ShipAddress,
+                        CityShipId = request.cityShipId,
+                        Tel = request.tel,
+                        PaymentMethodId = request.paymentMethodId,
+                        TotalP = total_P,
+                    };
+
+                    await _context.HandleOrders.AddAsync(order_success);
+                    await _context.SaveChangesAsync();
+
+
+                    int value_price = total_P + (int)(total_P * 0.01) + (int)(city_ship.PriceShipping);
 
                     var order = new OrderRequest()
                     {
@@ -161,7 +186,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                         return BadRequest("fail to payment");
                     }
 
-                    PayPalCheckoutSdk.Orders.Order result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+                    Order result = response.Result<Order>();
 
                     return Ok(new
                     {
@@ -200,11 +225,39 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
                 //var invoiceId = order.PurchaseUnits[0].InvoiceId;
 
-              /*  var order = response.Result<Order>();
-                var order1 = order.PurchaseUnits[0].InvoiceId;
-              */
+                /*  var order = response.Result<Order>();
+                  var order1 = order.PurchaseUnits[0].InvoiceId;
+                */
+               string invoiceId = HttpContext.Session.GetString("invoiceId");
 
-                return Ok("payment success");
+                // sau khi thanh toán thành công tạo order vào đơn hàng:
+                var order_success = await _context.HandleOrders.FirstOrDefaultAsync(o => o.InvoiceId == invoiceId);
+                if (order_success != null)
+                {
+                    _new_order = new HandleOrder_2(
+                        _context, 
+                        order_success.UserId, 
+                        order_success.ShipAddress, 
+                        order_success.CityShipId, 
+                        order_success.Tel, 
+                        order_success.PaymentMethodId, 
+                        order_success.TotalP, 
+                        order_success.InvoiceId);
+
+                }
+                int result_order = await _new_order.Handle_payment();
+                if (result_order == 4000)
+                {
+                    return BadRequest("something wrong");
+                }
+
+
+                HttpContext.Session.Remove("invoiceId");
+                _context.HandleOrders.Remove(order_success);
+                _context.SaveChanges();
+
+                // thanh toán offline:
+                return Ok("Paymen success! your order will deliver early! please follow status order on website");
 
             }
             catch (Exception ex) {
@@ -223,15 +276,640 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
 
 
+        // USE FOR STAFF:
+        // HÀM LẤY CÁC ORDER ĐANG PENDING RA:
+        [HttpGet]
+        [Route("staff/status-order")]
+        public IActionResult get_order()
+        {
+            try
+            {
+                List<Entities.Order> orders = _context.Orders.Where(o => o.ShipingId == 1)
+                                                    .Include( o => o.Status )
+                                                    .Include( o => o.PaymentMethod )
+                                                    .Include( o => o.Shiping )
+                                                    .ToList();
+
+                if (orders.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                // create list DTO:
+                List<OrderDTO> ListDTO = new List<OrderDTO>();
+
+                // create DTO:
+                foreach ( var order in orders )
+                {
+                    ListDTO.Add(new OrderDTO()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel  = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        }
+
+                    });
+
+                }
+                 return Ok(ListDTO);
+            }catch(Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+      
 
 
 
 
+        // USE FOR STAFF
+        // XÁC NHẬN ORDER ( staff's function )
+        [HttpPost]
+        [Route("staff/verify-order")]
+        public IActionResult verify_order(int orderId)
+        {
+            try{
+                var order = _context.Orders.Where( o => o.Id == orderId ).Include(o => o.Status)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping).First();
+                var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
+                if (invoice_u == null)
+                {
+                    return BadRequest("not found the invoice");
+                }
+
+                
+
+                OrderDTO new_o = new OrderDTO()
+                {
+                    id = order.Id,
+                    user_id = (int)(order.UserId),
+                    created_at = order.CreatedAt,
+                    grand_total = (int)(order.GrandTotal),
+                    shipping_address = order.ShippingAddress,
+                    tel = order.Tel,
+                    invoiceId = order.InvoiceId,
+                    status_id = order.StatusId,
+                    Status = new StatusGetAll()
+                    {
+                        name = order.Status.Name,
+                    },
+                    payment_method_id = (int)(order.PaymentMethodId),
+                    MethodPayment = new MethodPaymentGetAll()
+                    {
+                        name = order.PaymentMethod.Name
+                    },
+                    shipping_id = order.ShipingId,
+                    Shipping = new ShippingGetAll()
+                    {
+                        name = order.Shiping.Name,
+                    }
+
+                };
+
+                if (order == null)
+                {
+                    return BadRequest();
+                }
+                
+
+                // thanh toán offline & online sẽ xử lý khác nhau:
+                if ( order.PaymentMethodId == 1 )
+                {
+                    // thanh toán offline: sửa lại status và shipping in order:
+                    invoice_u.Status = "unpaid";
+                    order.StatusId = 2;
+                    order.ShipingId = 2;
+
+                }
+                else
+                {
+                    invoice_u.Status = "paid";
+                    order.ShipingId = 2;
+                }
+
+                _context.SaveChanges();
+
+                //SEND MAIL INVOICE FOR CLIENT YOUR ORDER IS DELIVERING:
+                var user = _context.Users.FirstOrDefault(u => u.Id == order.UserId);
+                if (user != null)
+                {
+                    _emailService.sentSuccessOrder(user.Email, new_o);
+                }
+
+
+                return Ok("order is verify! which is delivering ");
+            }catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+        }
+        
+
+
+        // USE FOR STAFF
+        // HUỶ ORDER TỪ PHÍA NHÂN VIÊN:
+        [HttpPost]
+        [Route("staff/cancel-order")]
+        public IActionResult cancel_order(int orderId, string reason_cancel)
+        {
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+
+                if (order == null)
+                {
+                    return BadRequest("not found the order");
+                }
+                // thanh toán offline & online sẽ xử lý khác nhau:
+                // thanh toán offline: sửa lại status và shipping in order:
+                var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
+                if (invoice_u == null)
+                {
+                    return BadRequest("not found the invoice");
+                }
+
+                invoice_u.Status = "cancel";
+                    order.StatusId = 5;
+                    order.ShipingId = 4;
+
+                _context.SaveChanges();
+
+                // SEND MAIL TO CLIENT THE REASON CANCEL YOUR ORDER:
+                var user = _context.Users.FirstOrDefault(u => u.Id == order.UserId);
+                if (user != null)
+                {
+                    _emailService.sentCancelOrder(user.Email, reason_cancel);
+                }
+
+
+                return Ok("order is cacel! your manipulate done! ");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+  
+
+
+        // USE FOR CLIENT
+        // LẤY TRẠNG THÁI ĐƠN HÀNG CHO CLIENT ( lấy các trạng thái đang pending or delivering )
+        // phải là chính nó mới lấy  được dữ liệu của nó:
+        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
+        [HttpGet]
+        [Route("client/status-order-client")]
+        public IActionResult status_client(int userId)
+        {
+            try
+            {
+                //   var identity = HttpContext.User.Identity as ClaimsIdentity;
+                // if (!identity.IsAuthenticated)
+                //  {
+                //     return Unauthorized();
+                //  }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                //   int User_1 = Convert.ToInt32(u_id);
+
+
+                //  if (User_1 != userId)
+                //  {
+                //    return Forbid();
+                // }
+
+                List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 1 && o.UserId == userId || o.ShipingId == 2 && o.UserId == userId))
+                                                    .Include(o => o.Status)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping)
+                                                    .ToList();
+                // Nếu ko có return về not found
+                if (orders.Count == 0)
+                {
+                    return NotFound("You have no any orders");
+                }
+
+                // create list DTO:
+                List<OrderDTO> ListDTO = new List<OrderDTO>();
+
+                // create DTO:
+                foreach (var order in orders)
+                {
+                    ListDTO.Add(new OrderDTO()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        }
+
+                    });
+
+                }
+                return Ok(ListDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+
+
+        // USE FOR CLIENT 
+        // XÁC NHẬN CLIENT ĐÃ NHẬN HÀNG THÀNH CÔNG:
+        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
+        [HttpPost]
+        [Route("client/receive-goods")]
+        public IActionResult receive_goods( int orderId, int userId)
+        {
+            try
+            {
+               //   var identity = HttpContext.User.Identity as ClaimsIdentity;
+               // if (!identity.IsAuthenticated)
+              //  {
+               //     return Unauthorized();
+              //  }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+             //   int User_1 = Convert.ToInt32(u_id);
+
+
+              //  if (User_1 != userId)
+              //  {
+                //    return Forbid();
+               // }
+              
+
+                var order = _context.Orders.FirstOrDefault(o => ( o.Id == orderId && o.ShipingId == 2) );
+                if (order == null)
+                {
+                    return BadRequest("not found the order");
+                }
+                // cập nhận nhận hàng thành công:
+                order.StatusId = 4;
+
+                _context.SaveChanges();
+
+
+                return Ok("received goods successfully");
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        // USE FOR STAFF
+        // GET ORDER SUCCESS from user BUT NOT CONFIRM by staff ON SERVER:
+        // get by order status 4 & shipping 2 & order id:
+        [HttpGet]
+        [Route("staff/get-success-order")]
+        public IActionResult get_success_order()
+        {
+            try
+            {
+                List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 2 && o.StatusId == 4)).ToList();
+                // Nếu ko có return về not found
+                if (orders.Count == 0)
+                {
+                    return NotFound("dot have any order success");
+                }
+
+                // create list DTO:
+                List<OrderDTO> ListDTO = new List<OrderDTO>();
+
+                // create DTO:
+                foreach (var order in orders)
+                {
+                    ListDTO.Add(new OrderDTO()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        }
+
+                    });
+
+                }
+                return Ok(ListDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
 
+            // USE FOR staff
+            // XÁC NHẬN NHẬN HÀNG CHO CLIENT ->staff verify for client
+            [HttpPost]
+        [Route("staff/staff-verify")]
+        public IActionResult staff_verify(int orderId)
+        {
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o =>  o.Id == orderId );
+                if (order == null)
+                {
+                    return BadRequest("not found the order");
+                }
+                var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
+                if (invoice_u == null)
+                {
+                    return BadRequest("not found the invoice");
+                }
 
-        private static async Task<string> RandomString(int length = 6)
+                invoice_u.Status = "successfully";
+                // cập nhận nhận hàng thành công:
+                order.ShipingId = 3;
+                    
+                _context.SaveChanges();
+
+
+                return Ok("verify for client to reveived the order done!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+
+        // USE FOR CLIENT
+        // CLIENT HUỶ ĐƠN HÀNG KHI ĐANG PENDING:
+        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
+        [HttpPost]
+        [Route("client/cancel-client")]
+        public IActionResult cancel_client(int userId, int orderId ,string reason_cancel )
+        {
+            try
+            {
+             //   var identity = HttpContext.User.Identity as ClaimsIdentity;
+             //   if (!identity.IsAuthenticated)
+             //   {
+              //      return Unauthorized();  
+             //   }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+             //   int User_1 = Convert.ToInt32(u_id);
+
+
+             //   if (User_1 != userId)
+             //   {
+              //      return Forbid();
+             //   }
+                
+
+                var order = _context.Orders.FirstOrDefault(o => (o.UserId == userId && o.Id == orderId ));
+
+                if (order == null)
+                {
+                    return BadRequest("not found the order");
+                }
+
+                if (order.ShipingId == 2)
+                {
+                    return BadRequest("cannot cancel order when which on the delivering");
+                }
+
+
+                var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
+                if (invoice_u == null)
+                {
+                    return BadRequest("not found the invoice");
+                }
+
+                invoice_u.Status = "cancel";
+
+                // thanh toán offline & online sẽ xử lý khác nhau:
+                // thanh toán offline: sửa lại status và shipping in order:
+                order.StatusId = 5;
+                order.ShipingId = 4;
+
+                _context.SaveChanges();
+
+                // SEND MAIL TO CLIENT THE REASON CANCEL YOUR ORDER:
+                var user = _context.Users.FirstOrDefault(u => u.Id == order.UserId);
+                if (user != null)
+                {
+                    _emailService.sentCancelOrder(user.Email, reason_cancel);
+                }
+
+
+                return Ok("order is cacel! your manipulate done! ");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+
+
+
+        // USE FOR CLIENT:
+        // LẤY LỊCH SỬ ĐƠN HÀNG CHO CLIENT
+        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
+        [HttpGet]
+        [Route("client/history-order")]
+        public IActionResult history_order(int userId)
+        {
+            try
+            {
+              //  var identity = HttpContext.User.Identity as ClaimsIdentity;
+              //  if (!identity.IsAuthenticated)
+              //  {
+              //      return Unauthorized();
+             //   }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+             //   int User_1 = Convert.ToInt32(u_id);
+
+
+              //  if (User_1 != userId)
+              //  {
+                 //   return Forbid();
+             //   }
+
+                List<Entities.Order> orders = _context.Orders.Where(o => (o.UserId == userId && o.ShipingId == 3 || o.UserId == userId && o.ShipingId == 4))
+                                                    .Include(o => o.Status)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping)
+                                                    .ToList();
+
+                if (orders.Count == 0)
+                {
+                    return NotFound("you have no orders");
+                }
+
+                // create list DTO:
+                List<OrderDTO> ListDTO = new List<OrderDTO>();
+
+                // create DTO:
+                foreach (var order in orders)
+                {
+                    ListDTO.Add(new OrderDTO()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        }
+
+                    });
+
+                }
+                return Ok(ListDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        
+
+
+  
+        // USE FOR STAFF:
+        // LẤY LỊCH SỬ ĐƠN HÀNG OR ORDER CHO STAFF OR ADMIN
+        [HttpGet]
+        [Route("staff/history-staff")]
+        public IActionResult history_staff()
+        {
+            try
+            {
+                // lấy ra các đơn hàng đã thanh toán or đã huỷ:
+                List<Entities.Order> orders = _context.Orders.Where(o => ( o.ShipingId == 3 || o.ShipingId == 4))
+                                                    .Include(o => o.Status)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping)
+                                                    .ToList();
+
+                if (orders.Count == 0)
+                {
+                    return NotFound("you have no orders");
+                }
+
+                // create list DTO:
+                List<OrderDTO> ListDTO = new List<OrderDTO>();
+
+                // create DTO:
+                foreach (var order in orders)
+                {
+                    ListDTO.Add(new OrderDTO()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        }
+
+                    });
+
+                }
+                return Ok(ListDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+
+
+            private static async Task<string> RandomString(int length = 6)
         {
             Random random = new Random();
             string character = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -261,6 +939,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                 var product = await _context.Products.FirstOrDefaultAsync( p => p.Id == c_p.ProductId);
                 // CHECK NẾU SẢN PHẨM IsActive == FALSE
 
+                if (product.IsValid == true) { 
                 // Add sản phẩm vào cart 
                 cart_new.Add(new Item()
                 {
@@ -272,7 +951,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     },
                     Quantity = c_p.BuyQty.ToString()
                 });
-
+                }
                 // lấy ra tổng tiền:
                 Total_price += (int)(product.Price) * c_p.BuyQty;
             }

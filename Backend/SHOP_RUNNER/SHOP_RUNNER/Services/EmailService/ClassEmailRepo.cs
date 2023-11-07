@@ -3,16 +3,20 @@ using MimeKit.Text;
 using MimeKit;
 using SHOP_RUNNER.Models.Email;
 using MailKit.Net.Smtp;
+using SHOP_RUNNER.DTOs.Order_DTO;
+using SHOP_RUNNER.Entities;
 
 namespace SHOP_RUNNER.Services.EmailService
 {
     public class ClassEmailRepo : IEmailService
     {
         private readonly IConfiguration _configuration;
+        private readonly RunningShopContext _context;
 
-        public ClassEmailRepo(IConfiguration configuration)
+        public ClassEmailRepo(IConfiguration configuration, RunningShopContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         //_configuration.GetSection("EMAIL:EmailHost").Value
@@ -64,6 +68,54 @@ namespace SHOP_RUNNER.Services.EmailService
             smtp.Send(email);
             smtp.Disconnect(true);
         }
+
+        public void sentSuccessOrder(string to, OrderDTO body)
+        {
+            var email = new MimeMessage();
+
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EMAIL:EmailUsername").Value)); // lay email cua minh trong file appSetting.json
+
+            email.To.Add(MailboxAddress.Parse(to));
+
+            email.Subject = "INVOICE SHOP RUNNER";
+
+            // DÙNG OrderDTO lấy các dữ liệu cần thiết đề gửi INVOICE đoạn này nhé
+
+            email.Body = new TextPart(TextFormat.Html)
+            {
+                Text = $"<h1>YOUR ORDER IS DELIVERING:</h1></br><h3>address: {body.shipping_address}</h3><p>TEST THỬ</p>"
+            };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EMAIL:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EMAIL:EmailUsername").Value, _configuration.GetSection("EMAIL:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
+
+        public void sentCancelOrder(string to, string body)
+        {
+            var email = new MimeMessage();
+
+            email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EMAIL:EmailUsername").Value)); // lay email cua minh trong file appSetting.json
+
+            email.To.Add(MailboxAddress.Parse(to));
+
+            email.Subject = "EMAIL FROM SHOP RUNNER";
+
+            email.Body = new TextPart(TextFormat.Html)
+            {
+                Text = $"<p>thank you to bought products from our store but some reasons your order is not success</p></br><p>the reason for this crash: </p><p>{body}</p><br/><p> sorry about this crash! <p>"
+            };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_configuration.GetSection("EMAIL:EmailHost").Value, 587, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_configuration.GetSection("EMAIL:EmailUsername").Value, _configuration.GetSection("EMAIL:EmailPassword").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
+
+
 
     }
 }

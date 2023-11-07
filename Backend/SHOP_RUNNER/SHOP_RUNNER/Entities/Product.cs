@@ -31,6 +31,8 @@ public partial class Product
 
     public int ColorId { get; set; }
 
+    public bool? IsValid { get; set; }
+
     public virtual Brand Brand { get; set; } = null!;
 
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();

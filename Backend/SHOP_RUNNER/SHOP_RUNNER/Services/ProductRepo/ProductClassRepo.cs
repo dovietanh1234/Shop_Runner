@@ -125,21 +125,24 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach (var product in products)
             {
-                ListDTO.Add(new ProductGetAll()
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Description = product.Description,
-                    Thumbnail = product.Thumbnail,
-                    Qty = product.Qty,
-                    CategoryId = product.CategoryId,
-                    Category = new CategoryGetAll()
+                if (product.IsValid == true) {
+                    ListDTO.Add(new ProductGetAll()
                     {
-                        Id = product.Category.Id,
-                        Name = product.Category.Name,
-                    }
-                });
+                        Id = product.Id,
+                        Name = product.Name,
+                        Price = product.Price,
+                        Description = product.Description,
+                        Thumbnail = product.Thumbnail,
+                        Qty = product.Qty,
+                        CategoryId = product.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = product.Category.Id,
+                            Name = product.Category.Name,
+                        }
+                    });
+                }
+               
             }
 
             return ListDTO;
@@ -160,6 +163,11 @@ namespace SHOP_RUNNER.Services.ProductRepo
                 .First();
 
             if (p == null)
+            {
+                return null;
+            }
+
+            if (p.IsValid == false)
             {
                 return null;
             }
@@ -234,21 +242,26 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach (var product in products)
             {
-                list_p.Add(new ProductGetAll()
+                if (product.IsValid == true)
                 {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Description = product.Description,
-                    Thumbnail = product.Thumbnail,
-                    Qty = product.Qty,
-                    CategoryId = product.CategoryId,
-                    Category = new CategoryGetAll()
+                    list_p.Add(new ProductGetAll()
                     {
-                        Id = product.Category.Id,
-                        Name = product.Category.Name,
-                    }
-                });
+                        Id = product.Id,
+                        Name = product.Name,
+                        Price = product.Price,
+                        Description = product.Description,
+                        Thumbnail = product.Thumbnail,
+                        Qty = product.Qty,
+                        CategoryId = product.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = product.Category.Id,
+                            Name = product.Category.Name,
+                        }
+                    });
+                }
+
+               
             }
             return list_p;
 
@@ -268,21 +281,25 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach ( var product in allProducts)
             {
-                list_p.Add(new ProductGetAll()
+                if (product.IsValid == true)
                 {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Description = product.Description,
-                    Thumbnail = product.Thumbnail,
-                    Qty = product.Qty,
-                    CategoryId = product.CategoryId,
-                    Category = new CategoryGetAll()
+                    list_p.Add(new ProductGetAll()
                     {
-                        Id = product.Category.Id,
-                        Name = product.Category.Name,
-                    }
-                });
+                        Id = product.Id,
+                        Name = product.Name,
+                        Price = product.Price,
+                        Description = product.Description,
+                        Thumbnail = product.Thumbnail,
+                        Qty = product.Qty,
+                        CategoryId = product.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = product.Category.Id,
+                            Name = product.Category.Name,
+                        }
+                    });
+                }
+
             }
             return list_p;
         }
@@ -343,22 +360,25 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach (var product in result) {
 
-                New_List.Add(new ProductGetAll()
+                if (product.IsValid == true)
                 {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Description = product.Description,
-                    Thumbnail = product.Thumbnail,
-                    Qty = product.Qty,
-                    CategoryId = product.CategoryId,
-                    Category = new CategoryGetAll()
-                    {
-                        Id = product.Category.Id,
-                        Name = product.Category.Name
-                    }
-                });
 
+                    New_List.Add(new ProductGetAll()
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Price = product.Price,
+                        Description = product.Description,
+                        Thumbnail = product.Thumbnail,
+                        Qty = product.Qty,
+                        CategoryId = product.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = product.Category.Id,
+                            Name = product.Category.Name
+                        }
+                    });
+                }
             }
 
             return new
@@ -433,22 +453,25 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach (var p in Products)
             {
-                List_p.Add(new ProductGetAll()
+                if (p.IsValid == true)
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.Price,
-                    Description = p.Description,
-                    Thumbnail = p.Thumbnail,
-                    Qty = p.Qty,
-                    CategoryId = p.CategoryId,
-                    Category = new CategoryGetAll()
+                    List_p.Add(new ProductGetAll()
                     {
-                        Id = p.Category.Id,
-                        Name = p.Category.Name
-                    }
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.Price,
+                        Description = p.Description,
+                        Thumbnail = p.Thumbnail,
+                        Qty = p.Qty,
+                        CategoryId = p.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = p.Category.Id,
+                            Name = p.Category.Name
+                        }
 
-                });
+                    });
+                }
             }
 
             return List_p;
@@ -477,21 +500,24 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             foreach (var p in Products)
             {
-                list_p.Add(new ProductGetAll()
+                if (p.IsValid == true)
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.Price,
-                    Description = p.Description,
-                    Thumbnail = p.Thumbnail,
-                    Qty = p.Qty,
-                    CategoryId = p.CategoryId,
-                    Category = new CategoryGetAll()
+                    list_p.Add(new ProductGetAll()
                     {
-                        Id = p.Category.Id,
-                        Name = p.Category.Name
-                    }
-                });
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.Price,
+                        Description = p.Description,
+                        Thumbnail = p.Thumbnail,
+                        Qty = p.Qty,
+                        CategoryId = p.CategoryId,
+                        Category = new CategoryGetAll()
+                        {
+                            Id = p.Category.Id,
+                            Name = p.Category.Name
+                        }
+                    });
+                }
 
             }
             return list_p;
@@ -499,7 +525,18 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
 
 
+        public void turn_off_p(int p_id)
+        {
+            var product = _context.Products.FirstOrDefault( p => p.Id == p_id );
 
+            if ( product == null )
+            {
+                return;
+            }
+
+            product.IsValid = false;
+            _context.SaveChanges();
+        }
 
 
 

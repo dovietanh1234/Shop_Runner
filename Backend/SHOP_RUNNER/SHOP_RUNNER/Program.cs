@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(options =>
  
  */
 
-// connect DB:
+// connect DB: singleton -> khởi tạo 1 lần chạy mọi nơi
 string ConnectionString = builder.Configuration.GetConnectionString("API");
 builder.Services.AddDbContext<SHOP_RUNNER.Entities.RunningShopContext>(
         option => option.UseSqlServer(ConnectionString));
@@ -85,6 +85,19 @@ builder.Services.AddAuthentication( JwtBearerDefaults.AuthenticationScheme).AddJ
     );
 
 
+// CẤU HÌNH SESSION:
+builder.Services.AddDistributedMemoryCache();
+
+// phương thức để thêm dịch vụ Session vào container dịch vụ
+// options là một đối tượng cho phép bạn cấu hình các tùy chọn cho Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+
 
 var app = builder.Build();
 
@@ -110,6 +123,8 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// KHAI BÁO SESSION MIDDLEWARE: gọi trước MapController() -> đảm bảo middleware session đc sd trc khi yc đến controller
+app.UseSession();
 
 app.MapControllers();
 

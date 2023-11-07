@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SHOP_RUNNER.Services.Cart_service;
+using System.Security.Claims;
 
 namespace SHOP_RUNNER.Controllers.Cart_Controller
 {
@@ -15,11 +18,30 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
             _ICart = icart;
         }
 
+
+        // TẮT CHỨC NĂNG TOKEN:
+        // , Authorize(Roles = "User")
         [HttpPost]
         [Route("add-to-cart")]
         public IActionResult add_to_cart(int userId, int product_id)
         {
             try {
+                /*
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                */
+
                 int result = _ICart.createCart(userId, product_id);
 
                 return Ok(result == 0002 ? "add to cart success" : "run out of the product in cart");
@@ -32,13 +54,30 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
         }
 
         // đoạn code này -> chỉ sử dụng trong cart -> vì nó check điều kiện phải có sản phẩm trong cart thì mới alter kết quả nhé!
+
+        // TẮT CHỨC NĂNG TOKEN:
+        //   | , Authorize(Roles = "User")
         [HttpPost]
         [Route("alter_quantity")]
         public IActionResult updateCart(int userId, int product_id, int? plus, int? minus, int? quantity)
         {
             try
             {
+                /*
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
 
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                */
                 int result = _ICart.updateCart( userId, product_id, plus, minus, quantity );
                 if ( result == 4001 )
                 {
@@ -52,6 +91,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 {
                     return Ok("not have any value pass in...");
                 }
+                
 
                 return Ok("success manipulation");
 
@@ -61,12 +101,30 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
             }
         }
 
+
+        // TẮT CHỨC NĂNG TOKEN:
+        // , Authorize(Roles = "User")
         [HttpDelete]
         [Route("delete-product-cart")]
         public IActionResult delete_product(int userId, int product_id)
         {
             try
             {
+                /*
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                */
                 int result = _ICart.delete_product(userId, product_id);
 
                 return Ok( result == 4000? "some error occur please try later":"success manipulation" );
@@ -78,17 +136,71 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
             }
         }
 
+
+        // TẮC CHỨC NĂNG TOKEN:
+        // , Authorize(Roles = "User")
         [HttpDelete]
-        [Route("")]
+        [Route("delete-cart")]
         public IActionResult delete_cart(int userId)
         {
             try
             {
+                /*
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }*/
+
 
                 int result = _ICart.delete_cart(userId);
                 return Ok(result == 4003 ? "run out of product in cart" : "success manipulation");
 
             }catch(Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        // GET ALL CART:
+        // tắt chức năng token: | , Authorize(Roles = "User")
+        [HttpGet]
+        [Route("get-cart")]
+        public IActionResult get_cart(int userId)
+        {
+            try
+            {
+                /*
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                */
+
+                // GET ALL CART:
+              
+                return Ok(_ICart.get_cart(userId));
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(ex.Message);
             }
         }

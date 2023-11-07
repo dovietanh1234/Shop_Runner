@@ -27,6 +27,8 @@ public partial class RunningShopContext : DbContext
 
     public virtual DbSet<Gender> Genders { get; set; }
 
+    public virtual DbSet<HandleOrder> HandleOrders { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<MethodPayment> MethodPayments { get; set; }
@@ -142,6 +144,25 @@ public partial class RunningShopContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<HandleOrder>(entity =>
+        {
+            entity.HasKey(e => e.InvoiceId).HasName("PK__handle_o__F58DFD49C79AC8B6");
+
+            entity.ToTable("handle_order");
+
+            entity.Property(e => e.InvoiceId)
+                .HasMaxLength(20)
+                .HasColumnName("invoice_id");
+            entity.Property(e => e.CityShipId).HasColumnName("cityShipId");
+            entity.Property(e => e.PaymentMethodId).HasColumnName("paymentMethodId");
+            entity.Property(e => e.ShipAddress).HasMaxLength(200);
+            entity.Property(e => e.Tel)
+                .HasMaxLength(20)
+                .HasColumnName("tel");
+            entity.Property(e => e.TotalP).HasColumnName("total_P");
+            entity.Property(e => e.UserId).HasColumnName("userId");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -319,6 +340,10 @@ public partial class RunningShopContext : DbContext
                 .HasColumnType("text")
                 .HasColumnName("description");
             entity.Property(e => e.GenderId).HasColumnName("gender_id");
+            entity.Property(e => e.IsValid)
+                .IsRequired()
+                .HasDefaultValueSql("((1))")
+                .HasColumnName("isValid");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .IsUnicode(false)

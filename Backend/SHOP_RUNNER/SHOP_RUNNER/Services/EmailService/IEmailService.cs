@@ -1,4 +1,5 @@
-﻿using SHOP_RUNNER.Models.Email;
+﻿using SHOP_RUNNER.DTOs.Order_DTO;
+using SHOP_RUNNER.Models.Email;
 
 namespace SHOP_RUNNER.Services.EmailService
 {
@@ -6,5 +7,9 @@ namespace SHOP_RUNNER.Services.EmailService
     {
         void SendEmail(EmailModel request);
         void sentOtp(string to, string body);
+
+        void sentSuccessOrder(string to, OrderDTO body);
+
+        void sentCancelOrder(string to, string body);
     }
 }

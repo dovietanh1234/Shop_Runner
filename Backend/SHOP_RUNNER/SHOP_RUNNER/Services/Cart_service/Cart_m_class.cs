@@ -1,4 +1,7 @@
-﻿using SHOP_RUNNER.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using SHOP_RUNNER.DTOs.Cart;
+using SHOP_RUNNER.Entities;
+using System.Xml.Linq;
 
 namespace SHOP_RUNNER.Services.Cart_service
 {
@@ -17,8 +20,14 @@ namespace SHOP_RUNNER.Services.Cart_service
 
             var Cart_item = _context.Carts.FirstOrDefault( c => (c.UserId == userId && c.ProductId == product_id));
 
+
             if( product_subtract != null )
             {
+                if (product_subtract.IsValid != true)
+                {
+                    return 4003;
+                }
+
                 if (product_subtract.Qty <= 0)
                             {
                                 return 4001;
@@ -72,6 +81,11 @@ namespace SHOP_RUNNER.Services.Cart_service
 
             // nếu nó update qutity == 0 && và minus về => 1 tức là nó đang muốn loại sản phẩm khỏi cart ( Mình sẽ để cho nó cập nhật về == 0 ) Nó có thể tự xoá sản phẩm
             // thanh toán -> kiểm tra sản phẩm nào trong cart có quantity == 0 -> thì loại!
+
+            if (product_subtract.IsValid != true)
+            {
+                return 4003;
+            }
 
             if ( product_subtract != null && product_inCart != null)
             {
@@ -201,6 +215,40 @@ namespace SHOP_RUNNER.Services.Cart_service
                 return 4003;
             }
             return 0002;
+        }
+
+        public List<GetCart> get_cart(int userId)
+        {
+            var Cart_item = _context.Carts.Where( c => c.UserId == userId ).Include( c => c.Product ).ToList();
+            if(Cart_item.Count <= 0)
+            {
+                return null;
+            }
+
+            List<GetCart> Dto = new List<GetCart>();
+
+            foreach ( var element in Cart_item )
+            {
+
+                Dto.Add(new GetCart()
+                {
+                    qty = element.BuyQty,
+                    productId = (int)(element.ProductId),
+                    Product = new ProductCart()
+                    {
+                        Name = element.Product.Name,
+                        Price = element.Product.Price,
+                        Thumbnail = element.Product.Thumbnail
+                    }
+
+                });
+
+            }
+
+
+            return Dto;
+
+
         }
 
     }

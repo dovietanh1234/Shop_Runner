@@ -3,7 +3,7 @@ using SHOP_RUNNER.Entities;
 
 namespace SHOP_RUNNER.Services.Order_service
 {
-    public class HandleOrder
+    public class HandleOrder_2
     {
         private readonly RunningShopContext _context;
 
@@ -15,7 +15,7 @@ namespace SHOP_RUNNER.Services.Order_service
         private int _price_in_cart;
         private string _invoice_id;
 
-        public HandleOrder(RunningShopContext context, int userId, string ShipAddress, int cityShipId, string tel, int paymentMethodId, int price_in_cart, string invoice_id)
+        public HandleOrder_2(RunningShopContext context, int userId, string ShipAddress, int cityShipId, string tel, int paymentMethodId, int price_in_cart, string invoice_id)
         {
             _context = context;
             _userId = userId;
@@ -43,7 +43,7 @@ namespace SHOP_RUNNER.Services.Order_service
                 // thanh toán offline
 
                 //1.create invoice:
-                await CreateInvoice(_invoice_id, _price_in_cart, 1);
+                await CreateInvoice(_invoice_id, _price_in_cart, 2);
 
                 //2. create order:
                 await CreateTblOrder(_price_in_cart, _invoice_id, 1, 1);
@@ -57,10 +57,10 @@ namespace SHOP_RUNNER.Services.Order_service
                 // thanh toán online
 
                 //1.create invoice:
-                await CreateInvoice(_invoice_id, _price_in_cart, 1);
+                await CreateInvoice(_invoice_id, _price_in_cart, 3);
 
                 //2. create order:
-                await CreateTblOrder(_price_in_cart, _invoice_id, 1, 1);
+                await CreateTblOrder(_price_in_cart, _invoice_id, 3, 1);
 
                 //3. create order detail:
                 await CreateOrderDetail();
@@ -114,20 +114,23 @@ namespace SHOP_RUNNER.Services.Order_service
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == c.ProductId);
 
                 // XỬ LÝ NẾU SẢN PHẨM isActive == false;
-
-                await _context.OrderProducts.AddAsync(new OrderProduct()
+                if (product.IsValid == true)
                 {
-                    ProductId = c.ProductId,
-                    OrderId = order_id.Id,
-                    BuyQty = c.BuyQty,
-                    Price = product.Price
-                });
+                    await _context.OrderProducts.AddAsync(new OrderProduct()
+                    {
+                        ProductId = c.ProductId,
+                        OrderId = order_id.Id,
+                        BuyQty = c.BuyQty,
+                        Price = product.Price
+                    });
+                }
+                
 
              
 
             }
                 // đoạn nay sai logic phải khi người dùng thay đổi trạng thái thì họ có thể xoá cart cũ đi 
-                //_context.Carts.RemoveRange(carts);
+                _context.Carts.RemoveRange(carts);
                 await _context.SaveChangesAsync();
 
 

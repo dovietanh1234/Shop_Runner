@@ -558,7 +558,7 @@ namespace SHOP_RUNNER.Controllers.User
             // TẠO YÊU CẦU CLAIM (ĐK)
             List<Claim> claims_user = new List<Claim>()
             {
-                new Claim("Id", user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // DOAN NAY CAN SUA VI NO QUAN TRONG -> TA SE XAC THUC NGUOI DUNG 
                 new Claim( ClaimTypes.Email, user.Email),
                 new Claim( ClaimTypes.Role, user.Role ),
                 
