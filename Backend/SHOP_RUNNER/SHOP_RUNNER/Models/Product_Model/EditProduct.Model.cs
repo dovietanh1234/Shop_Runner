@@ -22,14 +22,14 @@ namespace SHOP_RUNNER.Models.Product_Model
         public int qty { get; set; }
 
         [Required(ErrorMessage = "please enter type of category")]
-        public int category_id { get; set; }
+        public int categoryId { get; set; }
 
-        public int gender_id { get; set; }
+        public int genderId { get; set; }
 
-        public int brand_id { get; set; }
+        public int brandId { get; set; }
 
-        public int size_id { get; set; }
+        public int sizeId { get; set; }
 
-        public int color_id { get; set; }
+        public int colorId { get; set; }
     }
 }

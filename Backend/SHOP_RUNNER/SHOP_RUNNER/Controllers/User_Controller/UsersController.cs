@@ -72,7 +72,7 @@ namespace SHOP_RUNNER.Controllers.User
                     OtphashSalt = otp_hash_salt,
                     OtpSpamNumber = 1,
                     OtpSpam = DateTime.Now.AddDays(1), // 1 ngay se chi duoc gui 5 cai otp 
-                    LimitTimeToSendOtp = DateTime.Now.AddMinutes(2) // 2 phut se het han otp
+                    LimitTimeToSendOtp = DateTime.Now.AddMinutes(1) // 2 phut se het han otp
                 };
 
 

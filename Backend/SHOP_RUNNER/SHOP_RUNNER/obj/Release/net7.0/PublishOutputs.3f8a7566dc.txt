@@ -33,6 +33,8 @@ E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Mic
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\MimeKit.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Newtonsoft.Json.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Newtonsoft.Json.Bson.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\PayPalCheckoutSdk.dll
+E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\PayPalHttp-Dotnet.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Scrutor.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Swashbuckle.AspNetCore.Filters.dll
 E:\SHOP_RUNNER\Backend\SHOP_RUNNER\SHOP_RUNNER\obj\Release\net7.0\PubTmp\Out\Swashbuckle.AspNetCore.Filters.Abstractions.dll

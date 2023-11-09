@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using SHOP_RUNNER.Services.EmailService;
 using SHOP_RUNNER.Services.Cart_service;
+using SHOP_RUNNER.Services.Staff_service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddControllers().AddNewtonsoftJson( options => options.Serializ
 builder.Services.AddScoped<IProductRepo, ProductClassRepo>();
 builder.Services.AddScoped<IEmailService, ClassEmailRepo>();
 builder.Services.AddScoped<ICart_m, Cart_m_class>();
+builder.Services.AddScoped<IStaff_repo, Staff_class>();
 
 // triển khai Authorization 403 or 401 :
 

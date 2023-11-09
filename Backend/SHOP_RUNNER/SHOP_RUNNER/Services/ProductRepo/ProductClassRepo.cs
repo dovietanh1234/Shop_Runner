@@ -341,11 +341,11 @@ namespace SHOP_RUNNER.Services.ProductRepo
                 product_new.Description = product.description != ""?product.description : product_new.Description;
                 product_new.Thumbnail = product.Thumbnail!= null? url : product_new.Thumbnail;
                 product_new.Qty = product.qty;
-                product_new.CategoryId = product.category_id;
-                product_new.GenderId = product.gender_id;
-                product_new.BrandId = product.brand_id;
-                product_new.SizeId = product.size_id;
-                product_new.ColorId = product.color_id;
+                product_new.CategoryId = product.categoryId;
+                product_new.GenderId = product.genderId;
+                product_new.BrandId = product.brandId;
+                product_new.SizeId = product.sizeId;
+                product_new.ColorId = product.colorId;
                 _context.SaveChanges();
             }
         }
@@ -534,7 +534,15 @@ namespace SHOP_RUNNER.Services.ProductRepo
                 return;
             }
 
-            product.IsValid = false;
+            if (product.IsValid == true)
+            {
+                product.IsValid = false;
+            }
+            else
+            {
+                product.IsValid = true;
+            }
+           
             _context.SaveChanges();
         }
 

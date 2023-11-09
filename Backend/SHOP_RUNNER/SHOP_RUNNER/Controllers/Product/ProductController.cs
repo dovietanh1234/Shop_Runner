@@ -234,8 +234,8 @@ namespace SHOP_RUNNER.Controllers.Product
         // TÍNH NĂNG CHỈ SỬ DỤNG CHO STAFF OR ADMIN
         // | , Authorizaed("Admin")
         [HttpPost]
-        [Route("turn-off-product")]
-        public IActionResult turn_off(int product_id)
+        [Route("toggle-product")]
+        public IActionResult toggle_p(int product_id)
         {
 
             _IProductRepo.turn_off_p(product_id);
