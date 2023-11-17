@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SHOP_RUNNER.Models.Staff_model;
 using SHOP_RUNNER.Services.Staff_service;
+using System.Security.Claims;
 
 namespace SHOP_RUNNER.Controllers.Staff_controller
 {
@@ -17,19 +19,19 @@ namespace SHOP_RUNNER.Controllers.Staff_controller
         }
 
 
-        [HttpPost]
+        
+
+        [HttpPost, Authorize(Roles = "Admin,STAFF")]
         [Route("create-acc-staff")]
         public async Task<IActionResult> Index(Staff_register request)
         {
             try
             {
-                int a = await _staff_Repo.Register_account(request);
-                if(a == 403)
+                return Ok( new
                 {
-                    return Forbid("email have used");
-                }
-
-                return Ok("create account successfully");
+                    message = "Your Account create success",
+                    account = await _staff_Repo.Register_account(request)
+                });
 
             }catch (Exception ex)
             {
@@ -38,7 +40,7 @@ namespace SHOP_RUNNER.Controllers.Staff_controller
         }
 
         // change password nay co the su dung cho staff and user
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin,STAFF")]
         [Route("change-password")]
         public IActionResult changePassword(Staff_changePass user_new)
         {
@@ -69,7 +71,7 @@ namespace SHOP_RUNNER.Controllers.Staff_controller
         }
 
 
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin, STAFF")]
         [Route("get-users")]
         public IActionResult getAllUser()
         {
@@ -84,7 +86,7 @@ namespace SHOP_RUNNER.Controllers.Staff_controller
             }
         }
 
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin")]
         [Route("toggle-user")]
         public IActionResult toggle_user(int userId)
         {

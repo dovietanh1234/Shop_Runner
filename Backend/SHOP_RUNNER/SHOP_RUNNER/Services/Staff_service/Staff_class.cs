@@ -24,22 +24,20 @@ namespace SHOP_RUNNER.Services.Staff_service
         // staff -> toggle user account
         // -> toggle product
 
-        public async Task<int> Register_account(Staff_register request)
+        public async Task<DTO_staff_regis> Register_account(Staff_register request)
         {
-            if (_context.Users.Any(u => u.Email == request.Email))
-            {
-                return 403;
-            }
 
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
 
             string random_n = await RandomString();
 
+            string email2 = $"staff{random_n}@gmail.com";
+
             var user_n = new Entities.User
             {
                 Fullname = request.FullName,
-                Email = $"staff{random_n}@gmail.com",
+                Email = email2,
                 Role = "STAFF",
                 PasswordSalt = passwordSalt,  //Encoding.UTF8.GetBytes("fghjktyuifvn");
                 PasswordHash = passwordHash,
@@ -49,7 +47,11 @@ namespace SHOP_RUNNER.Services.Staff_service
             _context.Users.Add(user_n);
             _context.SaveChanges();
 
-            return 200;
+            return new DTO_staff_regis()
+            {
+                email = email2,
+                password = request.Password
+            };
         }
 
         public int change_password(Staff_changePass request)
@@ -111,6 +113,12 @@ namespace SHOP_RUNNER.Services.Staff_service
                 return 404;
             }
 
+            // nếu là role là staff or admin thì ko thể tắt được:
+            if ( user.Role == "STAFF" || user.Role == "Admin" )
+            {
+                return 404;
+            }
+
             if ( user.IsVerified == true )
             {
                 user.IsVerified = false;
@@ -129,6 +137,7 @@ namespace SHOP_RUNNER.Services.Staff_service
         // toggle san pham da lam ben kia:
 
 
+        
 
 
 

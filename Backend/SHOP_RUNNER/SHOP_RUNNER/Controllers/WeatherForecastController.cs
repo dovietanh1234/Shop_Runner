@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace SHOP_RUNNER.Controllers
 {
@@ -20,7 +21,8 @@ namespace SHOP_RUNNER.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast"), Authorize(Roles = "Admin")]
+        [HttpGet(Name = "GetWeatherForecast"), Authorize(Roles = "Admin")] // Authorize(Roles = "Admin,Staff")
+        [EnableRateLimiting("fixedWindow")]
         public IEnumerable<WeatherForecast> Get()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast

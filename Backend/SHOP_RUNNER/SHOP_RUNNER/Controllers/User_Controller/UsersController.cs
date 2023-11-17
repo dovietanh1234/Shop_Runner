@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SHOP_RUNNER.DTOs.Category_DTO;
 using SHOP_RUNNER.Entities;
 using SHOP_RUNNER.Models.Email;
 using SHOP_RUNNER.Models.Users;
@@ -11,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Net.WebRequestMethods;
 
 namespace SHOP_RUNNER.Controllers.User
@@ -33,13 +38,11 @@ namespace SHOP_RUNNER.Controllers.User
      
 
         [HttpPost("register")]
+        [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> Register(UserRegisterRequest request)
         {
-
             try
             {
-                 
-
                 if ( _context.Users.Any(u => u.Email == request.Email  ) )
                     {
                         return BadRequest("user already exist");
@@ -106,6 +109,7 @@ namespace SHOP_RUNNER.Controllers.User
 
         // verify otp để enable account:
         [HttpPost("verifyOtp")]
+        [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> verify_otp(string otp, string email)
         {
             // B1 lấy ip của client 
@@ -247,6 +251,7 @@ namespace SHOP_RUNNER.Controllers.User
          */
 
         [HttpPost("Login")]
+        [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
 
@@ -330,6 +335,7 @@ namespace SHOP_RUNNER.Controllers.User
 
 
         [HttpPost("refresh-token")]
+        [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> RefreshToken(int id)
         {
 
@@ -375,7 +381,7 @@ namespace SHOP_RUNNER.Controllers.User
         
 
 
-
+        // chưa triển khai
         [HttpPost("forgot-password")]
         public async Task<IActionResult> forgotPassword(string email)
         {
@@ -444,15 +450,60 @@ namespace SHOP_RUNNER.Controllers.User
         }
 
 
-        [HttpPost("log_out")]
+
+        /*
+           [HttpGet, Authorize(Roles = "User")]
+        [Route("get-cart")]
+        public IActionResult get_cart(int userId)
+        {
+            try
+            {
+                
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (update.Id != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+         */
+
+
+        [HttpPost("log_out"), Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> logout(int id)
         {
 
             try
             {
-            // XOA REFRESHTOKEN TRONG DB:
-            var user = await _context.Users.SingleOrDefaultAsync(user => user.Id == id);
 
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (id != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+
+                // XOA REFRESHTOKEN TRONG DB:
+                var user = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
+                
+                if (user == null)
+                {
+                    return Forbid("userId is not exist");
+                }
 
             // XOA REFREH TOKEN TRONG COOKIE:
             user.RefreshToken = null;
@@ -484,7 +535,7 @@ namespace SHOP_RUNNER.Controllers.User
             }
         }
 
-      
+
         /*  [HttpPost("send-mail")]
         public IActionResult testMail(EmailModel request)
         {
@@ -515,8 +566,107 @@ namespace SHOP_RUNNER.Controllers.User
         }*/
 
 
+        
 
-// CÁC FUNCTION VIẾT Ở ĐÂY:
+        [HttpPost, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
+        [Route("update-profile")]
+        public IActionResult update_profile(Profile update)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (update.Id != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                var user = _context.Users.FirstOrDefault( u => u.Id == update.Id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                if ( user.IsVerified == false || user.Role == "STAFF" || user.Role == "Admin")
+                {
+                    return Forbid();
+                }
+                
+
+                user.Avatar = "https://cdn.pixabay.com/photo/2013/07/13/12/07/avatar-159236_640.png";
+                user.Tel = update.tel;
+                user.Address = update.address;
+                user.City = update.city;
+
+                _context.SaveChanges();
+
+                return Ok("update success");
+
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
+        [Route("get-profile")]
+        public IActionResult get_profile(int userId)
+        {
+            try
+            {
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                if (user.IsVerified == false || user.Role == "STAFF" || user.Role == "Admin")
+                {
+                    return Forbid();
+                }
+
+                return Ok( new DTOs.User_DTO.profile()
+                {
+                    Fullname = user.Fullname,
+                    Email = user.Email,
+                    tel= user.Tel == null?"": user.Tel,
+                    address = user.Address == null ? "" : user.Address,
+                    city = user.City == null ? "" : user.City
+                });
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+
+        // CÁC FUNCTION VIẾT Ở ĐÂY:
 
         private RefreshToken GenerateRefreshToken()
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using PayPalCheckoutSdk.Orders;
 using SHOP_RUNNER.DTOs.Order_DTO;
@@ -35,14 +36,32 @@ namespace SHOP_RUNNER.Controllers.Order_controller
             _emailService = emailService;
         }
 
-        [HttpPost]
+
+
+        [HttpPost, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         [Route("payment")]
         public async Task<IActionResult> Order(OrderModel request)
         {
             try
             {
- //userId    ShipAddress ( truy vấn để default )    cityShipId      tel      paymentMethodId   consignee_name( tên người nhận hàng ) ( để default )
-            
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
+
+                if (request.userId != User_1)
+                {
+                    return Forbid("you are not permission");
+                }
+
+
+                //userId    ShipAddress ( truy vấn để default )    cityShipId      tel      paymentMethodId   consignee_name( tên người nhận hàng ) ( để default )
+
                 // thanh toán online paypal:
 
                 // tạo một hàm trả về List sản phẩm:
@@ -278,7 +297,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR STAFF:
         // HÀM LẤY CÁC ORDER ĐANG PENDING RA:
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/status-order")]
         public IActionResult get_order()
         {
@@ -341,23 +360,34 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR STAFF
         // XÁC NHẬN ORDER ( staff's function )
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/verify-order")]
         public IActionResult verify_order(int orderId)
         {
             try{
                 var order = _context.Orders.Where( o => o.Id == orderId ).Include(o => o.Status)
                                                     .Include(o => o.PaymentMethod)
-                                                    .Include(o => o.Shiping).First();
+                                                    .Include(o => o.Shiping)
+                                                    .Include(o => o.User).First();
+
+                if (order == null)
+                {
+                    return BadRequest("dont have any order");
+                }
+
                 var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
                 if (invoice_u == null)
                 {
                     return BadRequest("not found the invoice");
                 }
 
-                
+                if ( order.ShipingId == 2 )
+                {
+                    return BadRequest("this order verified");
+                }
 
-                OrderDTO new_o = new OrderDTO()
+
+                OrderDTO2 new_o = new OrderDTO2()
                 {
                     id = order.Id,
                     user_id = (int)(order.UserId),
@@ -380,6 +410,10 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     Shipping = new ShippingGetAll()
                     {
                         name = order.Shiping.Name,
+                    },
+                    user_entity = new ShippingGetAll()
+                    {
+                        name = order.User.Fullname
                     }
 
                 };
@@ -409,9 +443,34 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
                 //SEND MAIL INVOICE FOR CLIENT YOUR ORDER IS DELIVERING:
                 var user = _context.Users.FirstOrDefault(u => u.Id == order.UserId);
+
+                List<DtoDT> detail_o = new List<DtoDT>();
+
+                var detail_product = _context.OrderProducts.Where(od => od.OrderId == order.Id).Include(p => p.Product).ToList();
+
+                if (detail_product.Count == 0)
+                {
+                    return BadRequest("dont have any product in your order");
+                }
+
+                foreach ( var p_d in detail_product)
+                {
+                    detail_o.Add(new DtoDT()
+                    {
+                        product_id = (int)(p_d.ProductId),
+                        buy_qty = p_d.BuyQty,
+                        price = (int)(p_d.Price),
+                        ProductGetName = new ShippingGetAll()
+                        {
+                            name = p_d.Product.Name
+                        }
+                    });
+                }
+
                 if (user != null)
                 {
-                    _emailService.sentSuccessOrder(user.Email, new_o);
+                    //RunningShopContext _context
+                    _emailService.sentSuccessOrder(user.Email, new_o, detail_o); // nhan vao list<Odetail_product>
                 }
 
 
@@ -426,13 +485,15 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR STAFF
         // HUỶ ORDER TỪ PHÍA NHÂN VIÊN:
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/cancel-order")]
         public IActionResult cancel_order(int orderId, string reason_cancel)
         {
             try
             {
                 var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+
+
 
                 if (order == null)
                 {
@@ -445,6 +506,20 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                 {
                     return BadRequest("not found the invoice");
                 }
+
+                // CẬP NHẬT LẠI HÀNG VỀ KHO:
+                var cart_old = _context.OrderProducts.Where( o => o.OrderId == orderId).ToList();
+
+                foreach( var product in cart_old )
+                {
+                    var new_product = _context.Products.FirstOrDefault(p => p.Id == product.ProductId);
+
+                    if ( new_product != null )
+                    {
+                        new_product.Qty += product.BuyQty;
+                    }
+                }
+
 
                 invoice_u.Status = "cancel";
                     order.StatusId = 5;
@@ -475,27 +550,28 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         // USE FOR CLIENT
         // LẤY TRẠNG THÁI ĐƠN HÀNG CHO CLIENT ( lấy các trạng thái đang pending or delivering )
         // phải là chính nó mới lấy  được dữ liệu của nó:
-        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
-        [HttpGet]
+        //TẮT JWT ĐỂ TEST |
+        [HttpGet, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         [Route("client/status-order-client")]
         public IActionResult status_client(int userId)
         {
             try
             {
-                //   var identity = HttpContext.User.Identity as ClaimsIdentity;
-                // if (!identity.IsAuthenticated)
-                //  {
-                //     return Unauthorized();
-                //  }
+                  var identity = HttpContext.User.Identity as ClaimsIdentity;
+                 if (!identity.IsAuthenticated)
+                  {
+                     return Unauthorized();
+                }
                 // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
-                //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
-                //   int User_1 = Convert.ToInt32(u_id);
+                   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                   int User_1 = Convert.ToInt32(u_id);
 
 
-                //  if (User_1 != userId)
-                //  {
-                //    return Forbid();
-                // }
+                  if (User_1 != userId)
+                  {
+                    return Forbid();
+                 }
 
                 List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 1 && o.UserId == userId || o.ShipingId == 2 && o.UserId == userId))
                                                     .Include(o => o.Status)
@@ -554,27 +630,27 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR CLIENT 
         // XÁC NHẬN CLIENT ĐÃ NHẬN HÀNG THÀNH CÔNG:
-        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
-        [HttpPost]
+        //TẮT JWT ĐỂ TEST |
+        [HttpPost, Authorize(Roles = "USER")]
         [Route("client/receive-goods")]
         public IActionResult receive_goods( int orderId, int userId)
         {
             try
             {
-               //   var identity = HttpContext.User.Identity as ClaimsIdentity;
-               // if (!identity.IsAuthenticated)
-              //  {
-               //     return Unauthorized();
-              //  }
+                 var identity = HttpContext.User.Identity as ClaimsIdentity;
+               if (!identity.IsAuthenticated)
+                {
+                   return Unauthorized();
+               }
                 // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
-             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
-             //   int User_1 = Convert.ToInt32(u_id);
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
 
 
-              //  if (User_1 != userId)
-              //  {
-                //    return Forbid();
-               // }
+               if (User_1 != userId)
+                {
+                    return Forbid();
+                }
               
 
                 var order = _context.Orders.FirstOrDefault(o => ( o.Id == orderId && o.ShipingId == 2) );
@@ -599,7 +675,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         // USE FOR STAFF
         // GET ORDER SUCCESS from user BUT NOT CONFIRM by staff ON SERVER:
         // get by order status 4 & shipping 2 & order id:
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/get-success-order")]
         public IActionResult get_success_order()
         {
@@ -658,16 +734,21 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
             // USE FOR staff
             // XÁC NHẬN NHẬN HÀNG CHO CLIENT ->staff verify for client
-            [HttpPost]
+            [HttpPost, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/staff-verify")]
         public IActionResult staff_verify(int orderId)
         {
             try
             {
                 var order = _context.Orders.FirstOrDefault(o =>  o.Id == orderId );
+                
                 if (order == null)
                 {
                     return BadRequest("not found the order");
+                }
+                if (order.ShipingId == 3)
+                {
+                    return Forbid("order have done!");
                 }
                 var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
                 if (invoice_u == null)
@@ -693,27 +774,27 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR CLIENT
         // CLIENT HUỶ ĐƠN HÀNG KHI ĐANG PENDING:
-        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
-        [HttpPost]
+        //TẮT JWT ĐỂ TEST |
+        [HttpPost, Authorize(Roles = "USER")]
         [Route("client/cancel-client")]
         public IActionResult cancel_client(int userId, int orderId ,string reason_cancel )
         {
             try
             {
-             //   var identity = HttpContext.User.Identity as ClaimsIdentity;
-             //   if (!identity.IsAuthenticated)
-             //   {
-              //      return Unauthorized();  
-             //   }
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+               if (!identity.IsAuthenticated)
+               {
+                   return Unauthorized();  
+                }
                 // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
-             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
-             //   int User_1 = Convert.ToInt32(u_id);
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
 
 
-             //   if (User_1 != userId)
-             //   {
-              //      return Forbid();
-             //   }
+               if (User_1 != userId)
+               {
+                    return Forbid();
+               }
                 
 
                 var order = _context.Orders.FirstOrDefault(o => (o.UserId == userId && o.Id == orderId ));
@@ -728,6 +809,18 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     return BadRequest("cannot cancel order when which on the delivering");
                 }
 
+                // CẬP NHẬT LẠI HÀNG VỀ KHO:
+                var cart_old = _context.OrderProducts.Where(o => o.OrderId == orderId).ToList();
+
+                foreach (var product in cart_old)
+                {
+                    var new_product = _context.Products.FirstOrDefault(p => p.Id == product.ProductId);
+
+                    if (new_product != null)
+                    {
+                        new_product.Qty += product.BuyQty;
+                    }
+                }
 
                 var invoice_u = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
                 if (invoice_u == null)
@@ -736,6 +829,13 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                 }
 
                 invoice_u.Status = "cancel";
+
+
+                //CẬP NHẬT LẠI SỐ LƯỢNG VỀ KHO
+                // lấy ra order detail
+                // lấy ra trường: product.Quantity += order_product.buyQty
+
+
 
                 // thanh toán offline & online sẽ xử lý khác nhau:
                 // thanh toán offline: sửa lại status và shipping in order:
@@ -766,27 +866,28 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
         // USE FOR CLIENT:
         // LẤY LỊCH SỬ ĐƠN HÀNG CHO CLIENT
-        //TẮT JWT ĐỂ TEST |, Authorize(Roles = "User")
-        [HttpGet]
+        //TẮT JWT ĐỂ TEST |
+        [HttpGet, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         [Route("client/history-order")]
         public IActionResult history_order(int userId)
         {
             try
             {
-              //  var identity = HttpContext.User.Identity as ClaimsIdentity;
-              //  if (!identity.IsAuthenticated)
-              //  {
-              //      return Unauthorized();
-             //   }
-                // TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
-             //   var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
-             //   int User_1 = Convert.ToInt32(u_id);
+                var identity = HttpContext.User.Identity as ClaimsIdentity;
+                if (!identity.IsAuthenticated)
+                {
+                    return Unauthorized();
+                }
+              //   TA DA CAU HINH LAI ClaimTypes.NameIdentifier -> khi thuc hien cau hinh ACCESS TOKEN co truong "ClaimTypes.NameIdentifier"
+                var u_id = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value; // neu ko co tra ve ngoai le chu ko loi
+                int User_1 = Convert.ToInt32(u_id);
 
 
-              //  if (User_1 != userId)
-              //  {
-                 //   return Forbid();
-             //   }
+                if (User_1 != userId)
+                {
+                    return Forbid();
+                }
 
                 List<Entities.Order> orders = _context.Orders.Where(o => (o.UserId == userId && o.ShipingId == 3 || o.UserId == userId && o.ShipingId == 4))
                                                     .Include(o => o.Status)
@@ -847,7 +948,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
   
         // USE FOR STAFF:
         // LẤY LỊCH SỬ ĐƠN HÀNG OR ORDER CHO STAFF OR ADMIN
-        [HttpGet]
+        [HttpGet, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/history-staff")]
         public IActionResult history_staff()
         {
@@ -906,7 +1007,45 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                 return BadRequest(ex.Message);
             }
         }
-        
+
+
+        // get city shiping & method payment:
+        [HttpGet]
+        [Route("getCityShipping")]
+        public IActionResult getCityShipping()
+        {
+
+            try
+            {
+                var result  = _context.CityShippings.ToList();
+
+                if ( result.Count == 0 )
+                {
+                    return NotFound();
+                }
+
+                List<CityShipping2> cts = new List<CityShipping2>();
+
+
+                foreach ( var c in result )
+                {
+                    cts.Add(new CityShipping2()
+                    {
+                        id = c.Id,
+                        name = c.Name,
+                        price_shipping = (int)(c.PriceShipping)
+                    });
+                }
+
+                return Ok(cts);
+
+
+            }catch(Exception ex)
+            {
+                return BadRequest();
+            }
+
+        }
 
 
             private static async Task<string> RandomString(int length = 6)

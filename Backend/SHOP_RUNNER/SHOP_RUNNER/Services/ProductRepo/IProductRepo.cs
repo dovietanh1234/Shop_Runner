@@ -15,15 +15,15 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         void DeleteProduct(int id);
 
-        List<ProductGetAll> Search(string search);
+        List<ProductGetAll> Search(string search, int page);
 
         List<ProductGetAll> Relateds(int id);
 
         Object Paging(int page, int pagesize);
 
-        List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color);
+        List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color, int page);
 
-        List<ProductGetAll> Sort(string? sortBy);
+        List<ProductGetAll> Sort(string? sortBy, int page);
 
         void turn_off_p(int p_id);
 

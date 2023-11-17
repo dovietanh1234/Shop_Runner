@@ -5,7 +5,7 @@ namespace SHOP_RUNNER.Services.Staff_service
 {
     public interface IStaff_repo
     {
-        Task<int> Register_account(Staff_register request);
+        Task<DTO_staff_regis> Register_account(Staff_register request);
 
         int change_password( Staff_changePass user );
 

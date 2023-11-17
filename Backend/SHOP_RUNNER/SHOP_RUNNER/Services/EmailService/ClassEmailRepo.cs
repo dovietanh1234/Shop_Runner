@@ -5,6 +5,7 @@ using SHOP_RUNNER.Models.Email;
 using MailKit.Net.Smtp;
 using SHOP_RUNNER.DTOs.Order_DTO;
 using SHOP_RUNNER.Entities;
+using System.Text;
 
 namespace SHOP_RUNNER.Services.EmailService
 {
@@ -69,7 +70,7 @@ namespace SHOP_RUNNER.Services.EmailService
             smtp.Disconnect(true);
         }
 
-        public void sentSuccessOrder(string to, OrderDTO body)
+        public void sentSuccessOrder(string to, OrderDTO2 body, List<DtoDT> detail_o)
         {
             var email = new MimeMessage();
 
@@ -79,11 +80,38 @@ namespace SHOP_RUNNER.Services.EmailService
 
             email.Subject = "INVOICE SHOP RUNNER";
 
+            // tạo một chuỗi để lặp giá trị:
+            var ProductDetail1 = new StringBuilder();
+
+            int totalAmount = 0;
+            foreach ( var item in detail_o ) {
+                int value = item.buy_qty * item.price;
+                totalAmount += value;
+                ProductDetail1.Append($"<tr><td>{item.ProductGetName.name}</td><td style=\"text-align:center\">{body.id}</td><td style=\"text-align:center\">{item.buy_qty}</td><td style=\"text-align:center\">${value}</td></tr>");
+            }
+
+
             // DÙNG OrderDTO lấy các dữ liệu cần thiết đề gửi INVOICE đoạn này nhé
+            double vat = (double)(totalAmount) * 0.10;
+            double shipping = (double)(totalAmount) * 0.01;
+            double t_m2 = (double)(totalAmount) + shipping + vat;
 
             email.Body = new TextPart(TextFormat.Html)
             {
-                Text = $"<h1>YOUR ORDER IS DELIVERING:</h1></br><h3>address: {body.shipping_address}</h3><p>TEST THỬ</p>"
+                Text = $"<div style=\"width: 500px; margin: 10px auto; border: 3px solid #73AD21;\"> <div style=\"margin: auto 16px\"><div>" +
+                $"<div style=\"display: flex; justify-content: space-between\"><h1 style=\"\">Shop Runner.</h1><h3 style=\"margin-top:30px\">" +
+                $"Invoice</h3></div><div style=\"display: flex; justify-content: space-between\"><p style=\"\">" +
+                $"shop runner<br/> 8 Ton That Thuyet, My Dinh,<br/> Nam Tu Niem Ha Noi Viet Nam <br/>HotLine: 09999888</p><p style=\"\">Order code: {body.invoiceId}<br/> Order date: {body.created_at}</p></div>" +
+                $"</div><div><div style=\"display: flex; justify-content: space-between\"><div><h3 style=\"font-weight: bold\">BILLING INFROMATION</h3><p>Name: {body.user_entity.name},<br/>" +
+                $" Phone: {body.tel},<br/> Company name: FPT APTECH,<br/> Street address: {body.shipping_address},<br/> Town/City: {body.Shipping.name},<br/> Country: Viet Nam,<br/> Postcode/ZIP: 10000</p></div>" +
+                $"<div><h3 style=\"font-weight: bold\">PAYMENT</h3><p>Payment Method: {body.MethodPayment.name}, <br/>Order Status: Confirmed, <br/>Payment Status: {body.Status.name}, <br/>Shipping Method: Delivering</p>" +
+                $"</div></div></div><div><table style=\"width:100%;\"><tr><th>Products</th><th>SKU</th><th>Quantity</th><th>SubTotal</th></tr>{ProductDetail1}</table></div><hr/><div><div style=\"display: flex; justify-content: space-between\"><div></div>" +
+                $"<div style=\"line-height: 27px\"><span>Subtotal: ${totalAmount}</span> <br/><span>VAT 10%: ${vat}</span> <br/><span>Shipping: ${shipping}</span> <br/>" +
+                $"<span>Total: ${t_m2}</span> <br/></div></div></div><div><p style=\"text-align: justify;\">Hello Viet Anh<br/>" +
+                $"In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. " +
+                $"'Whenever you feel like criticizing anyone,' he told me, 'just remember that all the people in this world haven't had the " +
+                $"advantages that you've had</p></div><div><span>Best regards</span><br/><span>Email: conbonha2k@gmail.com<br/>Website: " +
+                $"Shoprunner.com</span><br/><br/></div></div></div>"
             };
 
             using var smtp = new SmtpClient();

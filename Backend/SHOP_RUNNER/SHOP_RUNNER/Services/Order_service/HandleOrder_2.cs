@@ -38,6 +38,13 @@ namespace SHOP_RUNNER.Services.Order_service
                 return 4000;
             }
 
+            bool cart_check = await _context.Carts.AnyAsync(c => c.UserId == _userId);
+
+            if (cart_check == false)
+            {
+                return 4000;
+            }
+
             if ( _paymentMethodId == 1 )
             {
                 // thanh toán offline

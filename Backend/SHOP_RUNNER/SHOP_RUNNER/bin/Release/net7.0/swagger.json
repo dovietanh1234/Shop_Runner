@@ -5,6 +5,39 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/Admin/get-staffs": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Admin/toggle-staffs": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "type": "integer",
+            "format": "int32",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Cart/add-to-cart": {
       "post": {
         "tags": [
@@ -426,6 +459,18 @@
         }
       }
     },
+    "/api/Order/getCityShipping": {
+      "get": {
+        "tags": [
+          "Order"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Product": {
       "get": {
         "tags": [
@@ -592,32 +637,32 @@
           },
           {
             "in": "formData",
-            "name": "category_id",
+            "name": "categoryId",
             "required": true,
             "type": "integer",
             "format": "int32"
           },
           {
             "in": "formData",
-            "name": "gender_id",
+            "name": "genderId",
             "type": "integer",
             "format": "int32"
           },
           {
             "in": "formData",
-            "name": "brand_id",
+            "name": "brandId",
             "type": "integer",
             "format": "int32"
           },
           {
             "in": "formData",
-            "name": "size_id",
+            "name": "sizeId",
             "type": "integer",
             "format": "int32"
           },
           {
             "in": "formData",
-            "name": "color_id",
+            "name": "colorId",
             "type": "integer",
             "format": "int32"
           }
@@ -639,6 +684,14 @@
             "in": "query",
             "name": "search",
             "type": "string",
+            "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
             "collectionFormat": "multi"
           }
         ],
@@ -749,6 +802,14 @@
             "name": "color",
             "type": "string",
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
@@ -768,6 +829,14 @@
             "in": "query",
             "name": "sortBy",
             "type": "string",
+            "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
             "collectionFormat": "multi"
           }
         ],
@@ -799,7 +868,7 @@
         }
       }
     },
-    "/api/Product/turn-off-product": {
+    "/api/Product/toggle-product": {
       "post": {
         "tags": [
           "Product"
@@ -812,6 +881,210 @@
             "format": "int32",
             "collectionFormat": "multi"
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Staff/create-acc-staff": {
+      "post": {
+        "tags": [
+          "Staff"
+        ],
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/Staff_register"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Staff/change-password": {
+      "post": {
+        "tags": [
+          "Staff"
+        ],
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/Staff_changePass"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Staff/get-users": {
+      "get": {
+        "tags": [
+          "Staff"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Staff/toggle-user": {
+      "post": {
+        "tags": [
+          "Staff"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "userId",
+            "type": "integer",
+            "format": "int32",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/statistic-month": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/top3-fastest-sold": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/product-sold-month": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/detail-soldProduct": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "productId",
+            "type": "integer",
+            "format": "int32",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/month-ago": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/statistic-week": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/product-sold-week": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/statistic-day": {
+      "get": {
+        "tags": [
+          "Statistic"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Statistic/product-sold-day": {
+      "get": {
+        "tags": [
+          "Statistic"
         ],
         "responses": {
           "200": {
@@ -1009,6 +1282,54 @@
         }
       }
     },
+    "/api/Users/update-profile": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/Profile"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Users/get-profile": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "userId",
+            "type": "integer",
+            "format": "int32",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/WeatherForecast": {
       "get": {
         "tags": [
@@ -1080,6 +1401,34 @@
       },
       "additionalProperties": false
     },
+    "Profile": {
+      "required": [
+        "address",
+        "city",
+        "id",
+        "tel"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "tel": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "address": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "city": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "ResetPasswordRequest": {
       "required": [
         "confirmPassword",
@@ -1090,6 +1439,52 @@
       "properties": {
         "token": {
           "minLength": 1,
+          "type": "string"
+        },
+        "password": {
+          "minLength": 6,
+          "type": "string"
+        },
+        "confirmPassword": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Staff_changePass": {
+      "required": [
+        "id",
+        "password_new",
+        "password_old"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "password_old": {
+          "minLength": 6,
+          "type": "string"
+        },
+        "password_new": {
+          "minLength": 6,
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Staff_register": {
+      "required": [
+        "confirmPassword",
+        "fullName",
+        "password"
+      ],
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "minLength": 6,
           "type": "string"
         },
         "password": {

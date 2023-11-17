@@ -4,4 +4,12 @@
     {
         public string name { get; set; }
     }
+
+    public class CityShipping2
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public int price_shipping { get; set; }
+    }
+
 }

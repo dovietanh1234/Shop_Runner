@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using SHOP_RUNNER.Services.Cart_service;
 using System.Security.Claims;
 
@@ -18,15 +21,17 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
             _ICart = icart;
         }
 
+        //  [HttpGet(Name = "GetWeatherForecast"), Authorize(Roles = "Admin")] // Authorize(Roles = "Admin,Staff")
 
         // TẮT CHỨC NĂNG TOKEN:
-        // , Authorize(Roles = "User")
-        [HttpPost]
+        // 
+        [HttpPost, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         [Route("add-to-cart")]
         public IActionResult add_to_cart(int userId, int product_id)
         {
             try {
-                /*
+                
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 if (!identity.IsAuthenticated)
                 {
@@ -40,7 +45,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 {
                     return Forbid("you are not permission");
                 }
-                */
+                
 
                 int result = _ICart.createCart(userId, product_id);
 
@@ -56,14 +61,14 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
         // đoạn code này -> chỉ sử dụng trong cart -> vì nó check điều kiện phải có sản phẩm trong cart thì mới alter kết quả nhé!
 
         // TẮT CHỨC NĂNG TOKEN:
-        //   | , Authorize(Roles = "User")
-        [HttpPost]
+        //   | 
+        [HttpPost, Authorize(Roles = "USER")]
         [Route("alter_quantity")]
         public IActionResult updateCart(int userId, int product_id, int? plus, int? minus, int? quantity)
         {
             try
             {
-                /*
+                
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 if (!identity.IsAuthenticated)
                 {
@@ -77,7 +82,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 {
                     return Forbid("you are not permission");
                 }
-                */
+                
                 int result = _ICart.updateCart( userId, product_id, plus, minus, quantity );
                 if ( result == 4001 )
                 {
@@ -103,14 +108,14 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
 
 
         // TẮT CHỨC NĂNG TOKEN:
-        // , Authorize(Roles = "User")
-        [HttpDelete]
+        // 
+        [HttpDelete, Authorize(Roles = "USER")]
         [Route("delete-product-cart")]
         public IActionResult delete_product(int userId, int product_id)
         {
             try
             {
-                /*
+                
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 if (!identity.IsAuthenticated)
                 {
@@ -124,7 +129,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 {
                     return Forbid("you are not permission");
                 }
-                */
+                
                 int result = _ICart.delete_product(userId, product_id);
 
                 return Ok( result == 4000? "some error occur please try later":"success manipulation" );
@@ -138,14 +143,14 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
 
 
         // TẮC CHỨC NĂNG TOKEN:
-        // , Authorize(Roles = "User")
-        [HttpDelete]
+        // 
+        [HttpDelete, Authorize(Roles = "USER")]
         [Route("delete-cart")]
         public IActionResult delete_cart(int userId)
         {
             try
             {
-                /*
+                
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 if (!identity.IsAuthenticated)
                 {
@@ -158,7 +163,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 if (userId != User_1)
                 {
                     return Forbid("you are not permission");
-                }*/
+                }
 
 
                 int result = _ICart.delete_cart(userId);
@@ -172,14 +177,15 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
 
 
         // GET ALL CART:
-        // tắt chức năng token: | , Authorize(Roles = "User")
-        [HttpGet]
+        // tắt chức năng token: | 
+        [HttpGet, Authorize(Roles = "USER")]
+        [EnableRateLimiting("fixedWindow")]
         [Route("get-cart")]
         public IActionResult get_cart(int userId)
         {
             try
             {
-                /*
+                
                 var identity = HttpContext.User.Identity as ClaimsIdentity;
                 if (!identity.IsAuthenticated)
                 {
@@ -193,7 +199,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 {
                     return Forbid("you are not permission");
                 }
-                */
+                
 
                 // GET ALL CART:
               
@@ -204,6 +210,7 @@ namespace SHOP_RUNNER.Controllers.Cart_Controller
                 return BadRequest(ex.Message);
             }
         }
+
 
     }
 }

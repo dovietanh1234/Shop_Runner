@@ -9,6 +9,9 @@ using Swashbuckle.AspNetCore.Filters;
 using SHOP_RUNNER.Services.EmailService;
 using SHOP_RUNNER.Services.Cart_service;
 using SHOP_RUNNER.Services.Staff_service;
+using Microsoft.AspNetCore.RateLimiting;
+using SHOP_RUNNER.Services.Statistics_Service;
+using SHOP_RUNNER.Services.Admin_service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +66,8 @@ builder.Services.AddScoped<IProductRepo, ProductClassRepo>();
 builder.Services.AddScoped<IEmailService, ClassEmailRepo>();
 builder.Services.AddScoped<ICart_m, Cart_m_class>();
 builder.Services.AddScoped<IStaff_repo, Staff_class>();
+builder.Services.AddScoped<IStatistics, Statistics_class>();
+builder.Services.AddScoped<IAdmin_repo, Admin_class>();
 
 // triển khai Authorization 403 or 401 :
 
@@ -101,6 +106,19 @@ builder.Services.AddSession(options =>
 
 
 
+//CẤU HÌNH RATE LIMIT: 5 request/10s
+builder.Services.AddRateLimiter(o =>
+{
+    o.AddFixedWindowLimiter(policyName: "fixedWindow", o2 => {
+        // số lượng cái request cho phép trong một cái window ( trong 1 khung thời gian nào đó )
+        o2.PermitLimit = 5; // cho phep 2 request
+        o2.Window = TimeSpan.FromSeconds(10);
+        o2.QueueLimit = 0;
+    });
+});
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -116,6 +134,9 @@ app.UseStaticFiles();
 
 // sử dụng gọi lại cấu hình của core ra đây:
 app.UseCors();
+
+// SỬ DỤNG RATE LIMMIT:
+app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 

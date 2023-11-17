@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using SHOP_RUNNER.Models.Statistics;
 
 namespace SHOP_RUNNER.Entities;
 
@@ -49,12 +50,32 @@ public partial class RunningShopContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    // vì ta làm thống kê truy vấn ra vài bảng không có trong DB nên ta tạo riêng:
+    //B1: cấu hình khai báo class ko tồn tại trong DB
+    public DbSet<total_month> total_Months { get; set; }
+    public DbSet<orders_a_month> orders_A_Months { get; set; }
+    public DbSet<top3soldest> top3Soldests { get; set; }
+
+
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=tcp:semester3.database.windows.net,1433;Database=Running_shop;User ID=Running_shop;Password=Dovietanh2k@;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // B2 quy định cho nó ko có primary key khoá:
+        modelBuilder.Entity<total_month>().HasNoKey();
+        modelBuilder.Entity<orders_a_month>().HasNoKey();
+        modelBuilder.Entity<top3soldest>().HasNoKey();
+        
+
+
+
+
+
+
         modelBuilder.Entity<Brand>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__brand__3213E83F43F63294");

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SHOP_RUNNER.Entities;
 using SHOP_RUNNER.Models.Product_Model;
 using SHOP_RUNNER.Services.ProductRepo;
@@ -17,7 +19,9 @@ namespace SHOP_RUNNER.Controllers.Product
             _IProductRepo = iProductRepo;
         }
 
+        //  ÁP DỤNG LIMIT REQUEST
         [HttpGet]
+        [EnableRateLimiting("fixedWindow")]
         public IActionResult getAll()
         {
             try
@@ -32,6 +36,7 @@ namespace SHOP_RUNNER.Controllers.Product
         }
 
         [HttpGet]
+        [EnableRateLimiting("fixedWindow")]
         [Route("get-by-id")]
         public IActionResult GetDetail(int id)
         {
@@ -46,7 +51,7 @@ namespace SHOP_RUNNER.Controllers.Product
         }
 
         // SỬA
-        [HttpPut]
+        [HttpPut, Authorize(Roles = "Admin,STAFF")]
         [Route("update")]
         public IActionResult updateP([FromForm]EditProduct product)
         {
@@ -85,8 +90,9 @@ namespace SHOP_RUNNER.Controllers.Product
 
         }
 
-   
-        [HttpPost]
+        
+
+        [HttpPost, Authorize(Roles = "Admin,STAFF")]
         public IActionResult AddP([FromForm]CreateProduct product) {
             try
             {
@@ -141,14 +147,14 @@ namespace SHOP_RUNNER.Controllers.Product
 
         [HttpGet]
         [Route("Search")]
-        public IActionResult SearchP(string search)
+        public IActionResult SearchP(string search, int page=1)
         {
             try
             {
 
                 if ( search != null )
                 {
-                    var result = _IProductRepo.Search(search);
+                    var result = _IProductRepo.Search(search, page);
 
                     return result != null?Ok(result) : NotFound();
 
@@ -193,31 +199,33 @@ namespace SHOP_RUNNER.Controllers.Product
         }
 
         [HttpGet]
+        [EnableRateLimiting("fixedWindow")]
         [Route("Filter")]
-        public IActionResult Filtering(double? to, double? from, string? category, string? gender, string? brand, string? size, string? color)
+        public IActionResult Filtering(double? to, double? from, string? category, string? gender, string? brand, string? size, string? color, int page = 1 )
         {
             try
             {
-                return Ok(_IProductRepo.Filter(to, from, category, gender, brand, size, color));
+                return Ok(_IProductRepo.Filter(to, from, category, gender, brand, size, color, page));
             }catch(Exception ex) { 
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpGet]
+        [EnableRateLimiting("fixedWindow")]
         [Route("Sorting")]
-        public IActionResult Sorting(string? sortBy)
+        public IActionResult Sorting(string? sortBy, int page = 1)
         {
             try
             {
-                return Ok( _IProductRepo.Sort(sortBy));
+                return Ok( _IProductRepo.Sort(sortBy, page));
 
             }catch(Exception ex) { 
             return BadRequest(ex.Message);
             }
         }
 
-        [HttpDelete]
+        [HttpDelete, Authorize(Roles = "Admin,STAFF")]
         [Route("delete")]
         public IActionResult delete(int id)
         {
@@ -233,7 +241,7 @@ namespace SHOP_RUNNER.Controllers.Product
 
         // TÍNH NĂNG CHỈ SỬ DỤNG CHO STAFF OR ADMIN
         // | , Authorizaed("Admin")
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin,STAFF")]
         [Route("toggle-product")]
         public IActionResult toggle_p(int product_id)
         {

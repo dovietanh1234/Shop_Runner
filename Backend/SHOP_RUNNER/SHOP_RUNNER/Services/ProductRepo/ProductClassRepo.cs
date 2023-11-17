@@ -270,16 +270,26 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         // ko search đc description
         // xong search
-        public List<ProductGetAll> Search(string search)
+        public List<ProductGetAll> Search(string search, int page)
         {
-            var allProducts = _context.Products
-                .Where(p => (p.Name.Contains(search) || EF.Functions.Like(EF.Property<string>(p, "Description"), $"%{search}%")) )
-                .Include(p => p.Category)
-                .ToList();
+
+
+            //  var allProducts = _context.Products
+            //          .Where(p => (p.Name.Contains(search) || EF.Functions.Like(EF.Property<string>(p, "Description"), $"%{search}%")) )
+            //         .Include(p => p.Category)
+            //         .ToList();
+
+
+
+            var allProducts = _context.Products.AsQueryable().Where(p => (p.Name.Contains(search) || EF.Functions.Like(EF.Property<string>(p, "Description"), $"%{search}%"))).Include(p => p.Category);
+
+            // var result = PaginationList<Product>.Create(Products, page, pagesize > 3 ? pagesize : PAGE_SIZE);
+
+            var results = PaginationList<Product>.Create(allProducts, page, 10);
 
             List<ProductGetAll> list_p = new List<ProductGetAll>();
 
-            foreach ( var product in allProducts)
+            foreach ( var product in results)
             {
                 if (product.IsValid == true)
                 {
@@ -358,6 +368,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             List<ProductGetAll> New_List = new List<ProductGetAll>();
 
+
             foreach (var product in result) {
 
                 if (product.IsValid == true)
@@ -391,7 +402,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
 
        
-       public List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color)
+       public List<ProductGetAll> Filter(double? from, double? to, string? category, string? gender, string? brand, string? size, string? color, int page)
         {
             // THỰC HIỆN TẠO MỘT TRUY VẤN CÓ THỂ HOLD ĐỢI CÁC THUỘC TÍNH KHÁC  (bằng cách sd hàm .AsQueryable() ) LẤY VỀ ALL DATA
             var Products = _context.Products.AsQueryable();
@@ -446,12 +457,15 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
             // if it does not have any case -> sort all products and return for client:
             Products = Products.OrderBy(p => p.Name);
-            Products.ToList();
+
+            var results = PaginationList<Product>.Create(Products, page, 10);
+
+            // Products.ToList();
 
 
             List<ProductGetAll> List_p = new List<ProductGetAll>();
 
-            foreach (var p in Products)
+            foreach (var p in results)
             {
                 if (p.IsValid == true)
                 {
@@ -479,10 +493,10 @@ namespace SHOP_RUNNER.Services.ProductRepo
         }
 
 
-        public List<ProductGetAll> Sort(string? sortBy)
+        public List<ProductGetAll> Sort(string? sortBy, int page)
         {
             var Products = _context.Products.AsQueryable();
-            Products = Products.OrderBy(p => p.Name);
+            
 
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -493,12 +507,14 @@ namespace SHOP_RUNNER.Services.ProductRepo
                     case "PRICE_DESC": Products = Products.OrderByDescending(p => p.Price); break;
                 }
             }
+            Products = Products.OrderBy(p => p.Name).Include(p => p.Category);
 
-            Products.Include(p => p.Category).ToList();
+            var results = PaginationList<Product>.Create(Products, page, 10);
+
 
             List<ProductGetAll> list_p = new List<ProductGetAll>();
 
-            foreach (var p in Products)
+            foreach (var p in results)
             {
                 if (p.IsValid == true)
                 {
