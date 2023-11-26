@@ -58,9 +58,6 @@ namespace SHOP_RUNNER.Services.ProductRepo
             string url = $"{Request.Scheme}://{Request.Host}/uploads/{filename}";*/
             #endregion
 
-
-
-
             Product new_Product = new Product()
             {
                 Name = product.Name,
@@ -316,13 +313,9 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
 
        
-        public void UpdateProduct(EditProduct product, string url)
+        public ProductGetAll UpdateProduct(EditProduct product, string url)
         {
-            var product_new = _context.Products.FirstOrDefault(p => p.Id == product.Id);
-
-
-         
-
+            var product_new = _context.Products.Where(p => p.Id == product.Id).Include(p => p.Category).First();
             /*  
             
 
@@ -357,7 +350,28 @@ namespace SHOP_RUNNER.Services.ProductRepo
                 product_new.SizeId = product.sizeId;
                 product_new.ColorId = product.colorId;
                 _context.SaveChanges();
+
+                return new ProductGetAll()
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.price,
+                    Description = product.description,
+                    Thumbnail = product.Thumbnail != null ? url : product_new.Thumbnail,
+                    Qty = product.qty,
+                    CategoryId = product.categoryId,
+                    Category = new CategoryGetAll()
+                    {
+                        Id = product_new.Category.Id,
+                        Name = product_new.Category.Name,
+                    }
+                };
+                   
             }
+
+            return null;
+
+
         }
 
        public Object Paging(int page, int pagesize)
@@ -496,7 +510,8 @@ namespace SHOP_RUNNER.Services.ProductRepo
         public List<ProductGetAll> Sort(string? sortBy, int page)
         {
             var Products = _context.Products.AsQueryable();
-            
+
+            Products = Products.OrderBy(p => p.Name);
 
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -507,7 +522,8 @@ namespace SHOP_RUNNER.Services.ProductRepo
                     case "PRICE_DESC": Products = Products.OrderByDescending(p => p.Price); break;
                 }
             }
-            Products = Products.OrderBy(p => p.Name).Include(p => p.Category);
+
+            Products = Products.Include(p => p.Category);
 
             var results = PaginationList<Product>.Create(Products, page, 10);
 

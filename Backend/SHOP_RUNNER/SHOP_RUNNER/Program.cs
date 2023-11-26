@@ -12,6 +12,7 @@ using SHOP_RUNNER.Services.Staff_service;
 using Microsoft.AspNetCore.RateLimiting;
 using SHOP_RUNNER.Services.Statistics_Service;
 using SHOP_RUNNER.Services.Admin_service;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +49,7 @@ builder.Services.AddDbContext<SHOP_RUNNER.Entities.RunningShopContext>(
 
 
 // ADD CORS:
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
@@ -56,7 +57,19 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
+});*/
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetIsOriginAllowed(orgin =>  true);
+    });
 });
+
+
 
 builder.Services.AddControllers().AddNewtonsoftJson( options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore );
 
@@ -111,8 +124,8 @@ builder.Services.AddRateLimiter(o =>
 {
     o.AddFixedWindowLimiter(policyName: "fixedWindow", o2 => {
         // số lượng cái request cho phép trong một cái window ( trong 1 khung thời gian nào đó )
-        o2.PermitLimit = 5; // cho phep 2 request
-        o2.Window = TimeSpan.FromSeconds(10);
+        o2.PermitLimit = 40; // cho phep 40 request / 1'
+        o2.Window = TimeSpan.FromMinutes(1);
         o2.QueueLimit = 0;
     });
 });
@@ -135,6 +148,7 @@ app.UseStaticFiles();
 // sử dụng gọi lại cấu hình của core ra đây:
 app.UseCors();
 
+
 // SỬ DỤNG RATE LIMMIT:
 app.UseRateLimiter();
 
@@ -148,6 +162,40 @@ app.UseAuthorization();
 
 // KHAI BÁO SESSION MIDDLEWARE: gọi trước MapController() -> đảm bảo middleware session đc sd trc khi yc đến controller
 app.UseSession();
+
+// Sử dụng ngăn chặn lỗi exception xảy ra:
+app.UseExceptionHandler( a => a.Run( async context =>
+{
+    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    context.Response.ContentType = "application/json";
+
+    var response = new { error = "fail please try again!" };
+
+    var json = JsonSerializer.Serialize(response);
+
+    await context.Response.WriteAsync(json);
+
+}));
+
+// cấu hình ngăn chặn lộ thông tin của ứng dụng:
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        // xoá tiêu đề server:
+        if (context.Response.Headers.ContainsKey("Server"))
+        {
+            context.Response.Headers.Remove("Server");
+        }
+
+        if (context.Response.Headers.ContainsKey("X-Powered-By"))
+        {
+            context.Response.Headers["X-Powered-By"] = "My custum value";
+        }
+        return Task.CompletedTask;
+    });
+    await next.Invoke();
+});
 
 app.MapControllers();
 

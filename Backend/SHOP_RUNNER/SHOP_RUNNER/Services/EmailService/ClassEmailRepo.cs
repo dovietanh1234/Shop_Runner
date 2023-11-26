@@ -107,7 +107,7 @@ namespace SHOP_RUNNER.Services.EmailService
                 $"<div><h3 style=\"font-weight: bold\">PAYMENT</h3><p>Payment Method: {body.MethodPayment.name}, <br/>Order Status: Confirmed, <br/>Payment Status: {body.Status.name}, <br/>Shipping Method: Delivering</p>" +
                 $"</div></div></div><div><table style=\"width:100%;\"><tr><th>Products</th><th>SKU</th><th>Quantity</th><th>SubTotal</th></tr>{ProductDetail1}</table></div><hr/><div><div style=\"display: flex; justify-content: space-between\"><div></div>" +
                 $"<div style=\"line-height: 27px\"><span>Subtotal: ${totalAmount}</span> <br/><span>VAT 10%: ${vat}</span> <br/><span>Shipping: ${shipping}</span> <br/>" +
-                $"<span>Total: ${t_m2}</span> <br/></div></div></div><div><p style=\"text-align: justify;\">Hello Viet Anh<br/>" +
+                $"<span>Total: ${t_m2}</span> <br/></div></div></div><div><p style=\"text-align: justify;\">Hello {body.user_entity.name}<br/>" +
                 $"In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. " +
                 $"'Whenever you feel like criticizing anyone,' he told me, 'just remember that all the people in this world haven't had the " +
                 $"advantages that you've had</p></div><div><span>Best regards</span><br/><span>Email: conbonha2k@gmail.com<br/>Website: " +

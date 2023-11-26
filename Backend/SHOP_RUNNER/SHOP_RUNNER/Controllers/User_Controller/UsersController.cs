@@ -214,7 +214,7 @@ namespace SHOP_RUNNER.Controllers.User
                     CreateOtpHash(otp_newest, out otp_hash, out otp_hash_salt);
                     old_otp.Otphash = otp_hash;
                     old_otp.OtphashSalt = otp_hash_salt;
-                    old_otp.LimitTimeToSendOtp = DateTime.Now.AddMinutes(2);
+                    old_otp.LimitTimeToSendOtp = DateTime.Now.AddMinutes(1);
                     await _context.SaveChangesAsync();
                     return Ok("Otp sent again your email");
                 }
@@ -261,17 +261,17 @@ namespace SHOP_RUNNER.Controllers.User
 
                 if (User_new == null)
                 {
-                    return BadRequest("user not found");
+                    return BadRequest("email or password is not correct");
                 }
 
                 if (User_new.IsVerified == false)
                 {
-                    return BadRequest("your account is not enable please register account and enable");
+                    return BadRequest("Please resend the otp code and check it in your email to activate your account");
                 }
 
                 if (!VerifyPasswordHash(request.Password, User_new.PasswordHash, User_new.PasswordSalt)) // this method return false -> change true and run condition
                 {
-                    return BadRequest("password is not correct");
+                    return BadRequest("email or password is not correct");
                 }
 
                 // Hàm Verify là để xử lý cái này!
@@ -475,7 +475,7 @@ namespace SHOP_RUNNER.Controllers.User
          */
 
 
-        [HttpPost("log_out"), Authorize(Roles = "USER")]
+        [HttpPost("log_out"), Authorize(Roles = "USER, Admin, STAFF")]
         [EnableRateLimiting("fixedWindow")]
         public async Task<IActionResult> logout(int id)
         {
@@ -520,7 +520,8 @@ namespace SHOP_RUNNER.Controllers.User
             {
                 Expires = DateTime.Now.AddDays(-1),
                 HttpOnly = true,
-                Secure = true
+                SameSite = SameSiteMode.None,
+                Secure = false
             };
 
             Response.Cookies.Append("refreshToken", "", cookieOption);
@@ -727,7 +728,7 @@ namespace SHOP_RUNNER.Controllers.User
             // tải thư viện: System.IdentifyModel.Tokens.Jwt;
             var new_token = new JwtSecurityToken(
             claims: claims_user,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddHours(10), // ALTER TIME EXPIRE
             signingCredentials: cred
             );
 

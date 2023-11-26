@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using PayPalCheckoutSdk.Orders;
 using SHOP_RUNNER.DTOs.Order_DTO;
 using SHOP_RUNNER.Entities;
+using SHOP_RUNNER.Models.name_input;
 using SHOP_RUNNER.Models.Order_model;
 using SHOP_RUNNER.Services.EmailService;
 using SHOP_RUNNER.Services.Order_service;
@@ -480,7 +481,125 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                 return BadRequest( ex.Message );
             }
         }
-        
+
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
+        [Route("staff/search")]
+        public IActionResult Search_order(int orderId)
+        {
+            try
+            {
+                var order = _context.Orders.Where(o => o.Id == orderId).Include(o => o.Status)
+                                                   .Include(o => o.PaymentMethod)
+                                                   .Include(o => o.Shiping)
+                                                   .Include(o => o.User).First();
+
+                if (order == null)
+                {
+                    return NotFound("order is not exist");
+                }
+
+                return Ok(new OrderDTO()
+                {
+                    id = order.Id,
+                    user_id = (int)(order.UserId),
+                    created_at = order.CreatedAt,
+                    grand_total = (int)(order.GrandTotal),
+                    shipping_address = order.ShippingAddress,
+                    tel = order.Tel,
+                    invoiceId = order.InvoiceId,
+                    status_id = order.StatusId,
+                    Status = new StatusGetAll()
+                    {
+                        name = order.Status.Name,
+                    },
+                    payment_method_id = (int)(order.PaymentMethodId),
+                    MethodPayment = new MethodPaymentGetAll()
+                    {
+                        name = order.PaymentMethod.Name
+                    },
+                    shipping_id = order.ShipingId,
+                    Shipping = new ShippingGetAll()
+                    {
+                        name = order.Shiping.Name,
+                    }
+
+                });
+
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
+        [Route("staff/detail-invoice")]
+        public IActionResult detail_invoice(int oderId)
+        {
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o => o.Id == oderId);
+
+                if (order == null)
+                {
+                    return NotFound(" not exist order ");
+                }
+
+                var invoice = _context.Invoices.FirstOrDefault(i => i.InvoiceNo == order.InvoiceId);
+
+                if ( invoice == null )
+                {
+                    return NotFound(" not exist invoice ");
+                }
+
+                return Ok(invoice);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
+        [Route("staff/detail/order-detail")]
+        public IActionResult watch_orderDetail(int orderId)
+        {
+            try
+            {
+                var order_detail = _context.OrderProducts.Where( od => od.OrderId == orderId).Include(od => od.Product).ToList();
+
+                if ( order_detail.Count == 0 )
+                {
+                    return NotFound("not found the detail product");
+                }
+
+                List<order_detail_dto> od_dto = new List<order_detail_dto>();
+
+
+                foreach ( var od in order_detail)
+                {
+                    od_dto.Add(new order_detail_dto()
+                    {
+                        ProductId = od.ProductId,
+                        OrderId = orderId,
+                        BuyQty = od.BuyQty,
+                        Price = od.Price,
+                        Product = new name_input_model()
+                        {
+                            name = od.Product.Name
+                        }
+                    }) ;
+                }
+
+                return Ok(order_detail);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
 
 
         // USE FOR STAFF

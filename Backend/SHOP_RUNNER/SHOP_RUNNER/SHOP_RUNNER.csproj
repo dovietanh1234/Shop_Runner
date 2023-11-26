@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\CategoryRepo\**" />
+    <Content Remove="Services\CategoryRepo\**" />
+    <EmbeddedResource Remove="Services\CategoryRepo\**" />
+    <None Remove="Services\CategoryRepo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MailKit" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.11" />
@@ -29,7 +36,6 @@
 
   <ItemGroup>
     <Folder Include="Entities\" />
-    <Folder Include="Services\CategoryRepo\" />
   </ItemGroup>
 
   <ItemGroup>

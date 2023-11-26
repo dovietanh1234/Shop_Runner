@@ -82,8 +82,7 @@ namespace SHOP_RUNNER.Controllers.Product
 
 
 
-                _IProductRepo.UpdateProduct(product, url);
-                return Ok("Update success");
+                return Ok(_IProductRepo.UpdateProduct(product, url)==null?"fail to update":_IProductRepo.UpdateProduct(product, url));
             }catch(Exception ex) {
                 return BadRequest(ex.Message);
             }

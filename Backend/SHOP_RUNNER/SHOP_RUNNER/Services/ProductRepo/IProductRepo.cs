@@ -11,7 +11,7 @@ namespace SHOP_RUNNER.Services.ProductRepo
 
         ProductGetAll AddProduct( CreateProduct product, string url);
 
-        void UpdateProduct(EditProduct product, string url);
+        ProductGetAll UpdateProduct(EditProduct product, string url);
 
         void DeleteProduct(int id);
 

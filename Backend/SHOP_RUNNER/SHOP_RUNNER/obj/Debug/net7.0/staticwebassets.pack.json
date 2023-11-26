@@ -1,6 +1,22 @@
 {
   "Files": [
     {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\41f84379-568a-45ed-b178-75a3daebbabc.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\41f84379-568a-45ed-b178-75a3daebbabc.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\9d2bb3f2-1853-4434-9ebe-32350e114b71.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\9d2bb3f2-1853-4434-9ebe-32350e114b71.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\a32411df-a2ef-4cb5-b9c2-162331d0c85b.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\a32411df-a2ef-4cb5-b9c2-162331d0c85b.jpg"
+    },
+    {
+      "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\a78074eb-21f8-4e75-abc7-0ee7e4456c91.jpg",
+      "PackagePath": "staticwebassets\\Uploads\\Images\\a78074eb-21f8-4e75-abc7-0ee7e4456c91.jpg"
+    },
+    {
       "Id": "E:\\SHOP_RUNNER\\Backend\\SHOP_RUNNER\\SHOP_RUNNER\\wwwroot\\Uploads\\Images\\fed759c4-d065-46d4-9237-8cda9b2bc714.jpg",
       "PackagePath": "staticwebassets\\Uploads\\Images\\fed759c4-d065-46d4-9237-8cda9b2bc714.jpg"
     },

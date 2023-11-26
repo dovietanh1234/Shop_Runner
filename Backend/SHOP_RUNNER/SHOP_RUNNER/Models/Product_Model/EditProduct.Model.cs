@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SHOP_RUNNER.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace SHOP_RUNNER.Models.Product_Model
 {
     public class EditProduct
     {
+        private string _name;
+        private string _description;
+
         public int Id { get; set; }
 
         [Required(ErrorMessage = "please enter product name")]
@@ -14,9 +18,9 @@ namespace SHOP_RUNNER.Models.Product_Model
         [Required(ErrorMessage = "please enter price product")]
         public int price { get; set; }
 
-        public string description { get; set; }
+        public string description { get; set; } 
 
-        public IFormFile Thumbnail { get; set; }
+        public IFormFile Thumbnail { get; set; } = null;
 
         [Required(ErrorMessage = "please enter quantity")]
         public int qty { get; set; }
