@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SHOP_RUNNER.Common;
 using SHOP_RUNNER.DTOs.Category_DTO;
 using SHOP_RUNNER.Entities;
@@ -19,6 +20,33 @@ namespace SHOP_RUNNER.Controllers.Brand_controller
         {
             _context = runningShopContext;
         }
+
+
+
+        /*
+        [HttpGet]
+        [Route("test/a/product")]
+        public IActionResult testGetAProduct(int productId)
+        {
+            try
+            {
+                var product = _context.Products.Include( p => p.Category ).Include(p => p.Size).FirstOrDefault( p => p.Id == productId );
+
+                if( product == null )
+                {
+                    return NotFound("không tìm thấy sản phẩm");
+                }
+
+                return Ok( new
+                {
+                       name_cate = product.Category.Name,
+                       name_size = product.Size.Name
+                });
+
+            }catch(Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+        }*/
 
 
         [HttpGet]

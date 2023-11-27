@@ -16,8 +16,8 @@ namespace SHOP_RUNNER.Services.Statistics_Service
         decimal price_month();
         int ordersMonth();
         int orderSuccess();
-        List<top3soldest> top3Soldest();
-        List<top3soldest> product_sold();
+        List<product_DTO_NAME> top3Soldest();
+        List<product_DTO_NAME> product_sold();
         List<Entities.OrderProduct> product_detail(int productId);
 
 

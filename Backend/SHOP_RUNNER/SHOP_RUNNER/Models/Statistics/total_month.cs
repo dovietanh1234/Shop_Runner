@@ -22,4 +22,16 @@
         public int Month { get; set; }
     }
 
+    public class product_DTO_NAME
+    {
+        public int product_id { get; set; }
+        public string name { get; set; }
+        public string price { get; set; }
+
+        public string thumbnail { get; set; }
+
+        public int SELLING { get; set; }
+
+    }
+
 }

@@ -15,6 +15,12 @@ public partial class OrderProduct
 
     public int Id { get; set; }
 
+    public string? NameProduct { get; set; }
+
+    public string? ColorProduct { get; set; }
+
+    public string? SizeProduct { get; set; }
+
     public virtual Order Order { get; set; } = null!;
 
     public virtual Product? Product { get; set; }

@@ -236,7 +236,7 @@ namespace SHOP_RUNNER.Services.Statistics_Service
         }
 
 
-        public List<top3soldest> top3Soldest()
+        public List<product_DTO_NAME> top3Soldest()
         {
             DateTime time_month = DateTime.Now;
 
@@ -256,13 +256,28 @@ namespace SHOP_RUNNER.Services.Statistics_Service
                 return null;
             }
 
-            return result;
+            List<product_DTO_NAME> result2 = new List<product_DTO_NAME>(); 
+
+            foreach ( var product in result )
+            {
+                var p = _context.Products.FirstOrDefault(o => o.Id == product.product_id);
+                result2.Add(new product_DTO_NAME()
+                {
+                    product_id = product.product_id,
+                    name = p.Name,
+                    price = (p.Price).ToString(),
+                    thumbnail = p.Thumbnail,
+                    SELLING = product.SELLING
+                });
+            }
+
+            return result2;
 
         }
 
 
         //tổng số sản phẩm đã bán ra:
-        public List<top3soldest> product_sold()
+        public List<product_DTO_NAME> product_sold()
         {
 
             DateTime time_month = DateTime.Now;
@@ -278,12 +293,29 @@ namespace SHOP_RUNNER.Services.Statistics_Service
 
             List<top3soldest> result = _context.top3Soldests.FromSqlRaw("Select od.product_id, SUM(buy_qty) as SELLING FROM orders as o INNER JOIN order_products as od ON o.id = od.order_id WHERE MONTH(created_at) = @month AND YEAR(created_at) = @year GROUP BY od.product_id ORDER BY SELLING DESC", parameters).ToList();
 
+
+
             if (result.Count == 0)
             {
                 return null;
             }
 
-            return result;
+            List<product_DTO_NAME> result2 = new List<product_DTO_NAME>();
+
+            foreach (var product in result)
+            {
+                var p = _context.Products.FirstOrDefault(o => o.Id == product.product_id);
+                result2.Add(new product_DTO_NAME()
+                {
+                    product_id = product.product_id,
+                    name = p.Name,
+                    price = (p.Price).ToString(),
+                    thumbnail = p.Thumbnail,
+                    SELLING = product.SELLING
+                });
+            }
+
+            return result2;
 
         }
 
@@ -402,6 +434,7 @@ namespace SHOP_RUNNER.Services.Statistics_Service
                     }
                 };
                 }
+
 
                 return result;
             }

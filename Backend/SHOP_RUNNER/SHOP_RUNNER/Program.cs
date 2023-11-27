@@ -180,20 +180,22 @@ app.UseExceptionHandler( a => a.Run( async context =>
 // cấu hình ngăn chặn lộ thông tin của ứng dụng:
 app.Use(async (context, next) =>
 {
-    context.Response.OnStarting(() =>
+    context.Response.OnStarting(state =>
     {
-        // xoá tiêu đề server:
-        if (context.Response.Headers.ContainsKey("Server"))
+        // ép kiểu đối tượng state về kiểu HttpContext
+        var ctx = (HttpContext)state;
+        if (ctx.Response.Headers.ContainsKey("Server"))
         {
-            context.Response.Headers.Remove("Server");
+            ctx.Response.Headers.Remove("Server");
         }
-
-        if (context.Response.Headers.ContainsKey("X-Powered-By"))
+        if (ctx.Response.Headers.ContainsKey("X-Powered-By"))
         {
-            context.Response.Headers["X-Powered-By"] = "My custum value";
+            ctx.Response.Headers["X-Powered-By"] = "Do Viet Anh";
         }
         return Task.CompletedTask;
-    });
+
+
+    }, context); // method will call again before it responses
     await next.Invoke();
 });
 

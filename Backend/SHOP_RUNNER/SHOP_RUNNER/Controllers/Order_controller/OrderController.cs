@@ -305,6 +305,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
             try
             {
                 List<Entities.Order> orders = _context.Orders.Where(o => o.ShipingId == 1)
+                                                    .Include(o => o.User)
                                                     .Include( o => o.Status )
                                                     .Include( o => o.PaymentMethod )
                                                     .Include( o => o.Shiping )
@@ -315,13 +316,16 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     return NotFound();
                 }
 
+                //Order_DTO1
+                
+
                 // create list DTO:
-                List<OrderDTO> ListDTO = new List<OrderDTO>();
+                List<Order_DTO1> ListDTO = new List<Order_DTO1>();
 
                 // create DTO:
                 foreach ( var order in orders )
                 {
-                    ListDTO.Add(new OrderDTO()
+                    ListDTO.Add(new Order_DTO1()
                     {
                         id = order.Id,
                         user_id = (int)(order.UserId),
@@ -344,6 +348,11 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                         Shipping = new ShippingGetAll()
                         {
                             name = order.Shiping.Name,
+                        },
+                        User = new user_for_order()
+                        {
+                            name = order.User.Fullname,
+                            email = order.User.Email,
                         }
 
                     });
@@ -489,6 +498,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
             try
             {
                 var order = _context.Orders.Where(o => o.Id == orderId).Include(o => o.Status)
+                                                   .Include(o => o.User)
                                                    .Include(o => o.PaymentMethod)
                                                    .Include(o => o.Shiping)
                                                    .Include(o => o.User).First();
@@ -498,7 +508,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     return NotFound("order is not exist");
                 }
 
-                return Ok(new OrderDTO()
+                return Ok(new Order_DTO1()
                 {
                     id = order.Id,
                     user_id = (int)(order.UserId),
@@ -521,6 +531,11 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     Shipping = new ShippingGetAll()
                     {
                         name = order.Shiping.Name,
+                    },
+                    User = new user_for_order()
+                    {
+                        name = order.User.Fullname,
+                        email = order.User.Email,
                     }
 
                 });
@@ -567,28 +582,27 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         {
             try
             {
-                var order_detail = _context.OrderProducts.Where( od => od.OrderId == orderId).Include(od => od.Product).ToList();
+                var order_detail = _context.OrderProducts.Where( od => od.OrderId == orderId).ToList();
 
                 if ( order_detail.Count == 0 )
                 {
                     return NotFound("not found the detail product");
                 }
 
-                List<order_detail_dto> od_dto = new List<order_detail_dto>();
+                List<orderDetailDTO> od_dto = new List<orderDetailDTO>();
 
 
                 foreach ( var od in order_detail)
                 {
-                    od_dto.Add(new order_detail_dto()
+                    od_dto.Add(new orderDetailDTO()
                     {
                         ProductId = od.ProductId,
                         OrderId = orderId,
                         BuyQty = od.BuyQty,
                         Price = od.Price,
-                        Product = new name_input_model()
-                        {
-                            name = od.Product.Name
-                        }
+                        name_p = od.NameProduct,
+                        size_p = od.SizeProduct,
+                        color_p = od.ColorProduct
                     }) ;
                 }
 
@@ -791,6 +805,8 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         }
 
 
+
+
         // USE FOR STAFF
         // GET ORDER SUCCESS from user BUT NOT CONFIRM by staff ON SERVER:
         // get by order status 4 & shipping 2 & order id:
@@ -800,20 +816,21 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         {
             try
             {
-                List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 2 && o.StatusId == 4)).ToList();
+                List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 2 && o.StatusId == 4)).Include(o => o.Status).Include(o => o.User)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping).ToList();
                 // Nếu ko có return về not found
                 if (orders.Count == 0)
                 {
-                    return NotFound("dot have any order success");
+                    return NotFound("The user has not received any orders so there is no order");
                 }
 
-                // create list DTO:
-                List<OrderDTO> ListDTO = new List<OrderDTO>();
+                List<Order_DTO1> ListDTO = new List<Order_DTO1>();
 
                 // create DTO:
                 foreach (var order in orders)
                 {
-                    ListDTO.Add(new OrderDTO()
+                    ListDTO.Add(new Order_DTO1()
                     {
                         id = order.Id,
                         user_id = (int)(order.UserId),
@@ -836,6 +853,76 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                         Shipping = new ShippingGetAll()
                         {
                             name = order.Shiping.Name,
+                        },
+                        User = new user_for_order()
+                        {
+                            name = order.User.Fullname,
+                            email = order.User.Email,
+                        }
+
+                    });
+
+                }
+                return Ok(ListDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        // USE FOR STAFF
+        // GET ORDER SUCCESS from user BUT NOT CONFIRM by staff ON SERVER:
+        // get by order status 4 & shipping 2 & order id:
+        [HttpGet, Authorize(Roles = "Admin, STAFF")] 
+        [Route("staff/get-verified-order")]
+        public IActionResult get_verifyOrder()
+        {
+            try
+            {
+                List<Entities.Order> orders = _context.Orders.Where(o => (o.ShipingId == 2 && o.StatusId == 2 || o.ShipingId == 2 && o.StatusId == 3)).Include(o => o.Status).Include(o => o.User)
+                                                    .Include(o => o.PaymentMethod)
+                                                    .Include(o => o.Shiping).ToList();
+                // Nếu ko có return về not found
+                if (orders.Count == 0)
+                {
+                    return NotFound("There are no orders in delivering");
+                }
+
+                List<Order_DTO1> ListDTO = new List<Order_DTO1>();
+
+                // create DTO:
+                foreach (var order in orders)
+                {
+                    ListDTO.Add(new Order_DTO1()
+                    {
+                        id = order.Id,
+                        user_id = (int)(order.UserId),
+                        created_at = order.CreatedAt,
+                        grand_total = (int)(order.GrandTotal),
+                        shipping_address = order.ShippingAddress,
+                        tel = order.Tel,
+                        invoiceId = order.InvoiceId,
+                        status_id = order.StatusId,
+                        Status = new StatusGetAll()
+                        {
+                            name = order.Status.Name,
+                        },
+                        payment_method_id = (int)(order.PaymentMethodId),
+                        MethodPayment = new MethodPaymentGetAll()
+                        {
+                            name = order.PaymentMethod.Name
+                        },
+                        shipping_id = order.ShipingId,
+                        Shipping = new ShippingGetAll()
+                        {
+                            name = order.Shiping.Name,
+                        },
+                        User = new user_for_order()
+                        {
+                            name = order.User.Fullname,
+                            email = order.User.Email,
                         }
 
                     });
@@ -851,9 +938,10 @@ namespace SHOP_RUNNER.Controllers.Order_controller
 
 
 
-            // USE FOR staff
-            // XÁC NHẬN NHẬN HÀNG CHO CLIENT ->staff verify for client
-            [HttpPost, Authorize(Roles = "Admin, STAFF")]
+
+        // USE FOR staff
+        // XÁC NHẬN NHẬN HÀNG CHO CLIENT ->staff verify for client
+        [HttpPost, Authorize(Roles = "Admin, STAFF")]
         [Route("staff/staff-verify")]
         public IActionResult staff_verify(int orderId)
         {
@@ -1075,6 +1163,7 @@ namespace SHOP_RUNNER.Controllers.Order_controller
             {
                 // lấy ra các đơn hàng đã thanh toán or đã huỷ:
                 List<Entities.Order> orders = _context.Orders.Where(o => ( o.ShipingId == 3 || o.ShipingId == 4))
+                                                    .Include(o => o.User)
                                                     .Include(o => o.Status)
                                                     .Include(o => o.PaymentMethod)
                                                     .Include(o => o.Shiping)
@@ -1085,13 +1174,12 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                     return NotFound("you have no orders");
                 }
 
-                // create list DTO:
-                List<OrderDTO> ListDTO = new List<OrderDTO>();
+                List<Order_DTO1> ListDTO = new List<Order_DTO1>();
 
                 // create DTO:
                 foreach (var order in orders)
                 {
-                    ListDTO.Add(new OrderDTO()
+                    ListDTO.Add(new Order_DTO1()
                     {
                         id = order.Id,
                         user_id = (int)(order.UserId),
@@ -1114,6 +1202,11 @@ namespace SHOP_RUNNER.Controllers.Order_controller
                         Shipping = new ShippingGetAll()
                         {
                             name = order.Shiping.Name,
+                        },
+                        User = new user_for_order()
+                        {
+                            name = order.User.Fullname,
+                            email = order.User.Email,
                         }
 
                     });
@@ -1187,6 +1280,10 @@ namespace SHOP_RUNNER.Controllers.Order_controller
         {
             // lấy ra các sản phẩm trong cart:
             var products_cart = await _context.Carts.Where(c => c.UserId == userId).ToListAsync();
+            if (products_cart.Count == 0)
+            {
+                throw new Exception("fail your cart is empty");
+            }
 
             int Total_price = 0;
             List<Item> cart_new = new List<Item>();

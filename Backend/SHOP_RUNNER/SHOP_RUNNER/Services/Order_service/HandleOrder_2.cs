@@ -118,7 +118,9 @@ namespace SHOP_RUNNER.Services.Order_service
 
             foreach( var c in carts )
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == c.ProductId);
+                var product = await _context.Products.Include(p => p.Size).Include(p => p.Color).FirstOrDefaultAsync(p => p.Id == c.ProductId);
+                //  var product = await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == c.ProductId);
+
 
                 // XỬ LÝ NẾU SẢN PHẨM isActive == false;
                 if (product.IsValid == true)
@@ -128,7 +130,10 @@ namespace SHOP_RUNNER.Services.Order_service
                         ProductId = c.ProductId,
                         OrderId = order_id.Id,
                         BuyQty = c.BuyQty,
-                        Price = product.Price
+                        Price = product.Price,
+                        NameProduct = product.Name,
+                        ColorProduct = product.Color.Name,
+                        SizeProduct = product.Size.Name,
                     });
                 }
                 

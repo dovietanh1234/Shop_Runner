@@ -57,8 +57,6 @@ public partial class RunningShopContext : DbContext
     public DbSet<top3soldest> top3Soldests { get; set; }
 
 
-
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=tcp:semester3.database.windows.net,1433;Database=Running_shop;User ID=Running_shop;Password=Dovietanh2k@;TrustServerCertificate=True;");
@@ -69,11 +67,6 @@ public partial class RunningShopContext : DbContext
         modelBuilder.Entity<total_month>().HasNoKey();
         modelBuilder.Entity<orders_a_month>().HasNoKey();
         modelBuilder.Entity<top3soldest>().HasNoKey();
-        
-
-
-
-
 
 
         modelBuilder.Entity<Brand>(entity =>
@@ -298,11 +291,23 @@ public partial class RunningShopContext : DbContext
             entity.Property(e => e.BuyQty)
                 .HasDefaultValueSql("((1))")
                 .HasColumnName("buy_qty");
+            entity.Property(e => e.ColorProduct)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("color_product");
+            entity.Property(e => e.NameProduct)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("name_product");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(14, 2)")
                 .HasColumnName("price");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.SizeProduct)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("size_product");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderProducts)
                 .HasForeignKey(d => d.OrderId)
@@ -450,7 +455,7 @@ public partial class RunningShopContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__users__3213E83F5701C047");
 
-            entity.ToTable("users");
+            entity.ToTable("users", tb => tb.HasTrigger("trgPreventDelete"));
 
             entity.HasIndex(e => e.Email, "UQ__users__AB6E61646BA6D761").IsUnique();
 
